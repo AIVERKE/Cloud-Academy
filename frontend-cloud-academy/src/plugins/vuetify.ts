@@ -8,8 +8,14 @@ export default createVuetify({
     themes: {
       light: {
         colors: {
-          primary: '#1867C0',
-          secondary: '#5CBBF6',
+          primary: '#1976D2',
+          secondary: '#424242',
+          background: '#F5F5F5',
+          surface: '#FFFFFF',
+          success: '#4CAF50',
+          warning: '#FB8C00', // orange/yellow
+          error: '#FF5252',
+          info: '#2196F3',
         },
       },
     },
