@@ -8,6 +8,6 @@ import { Tarea } from './entities/tarea.entity';
   imports: [TypeOrmModule.forFeature([Tarea])],
   controllers: [AssignmentsController],
   providers: [AssignmentsService],
-  exports: [TypeOrmModule],
+  exports: [AssignmentsService, TypeOrmModule],
 })
 export class AssignmentsModule {}
