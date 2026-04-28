@@ -8,6 +8,6 @@ import { LogAuditoria } from './entities/log-auditoria.entity';
   imports: [TypeOrmModule.forFeature([LogAuditoria])],
   controllers: [AuditController],
   providers: [AuditService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, AuditService],
 })
 export class AuditModule {}
