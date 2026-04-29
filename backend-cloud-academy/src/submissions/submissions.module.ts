@@ -6,9 +6,13 @@ import { Entrega } from './entities/entrega.entity';
 import { User } from '../auth/entities/user.entity';
 import { Tarea } from '../assignments/entities/tarea.entity';
 import { Aula } from '../classrooms/entities/aula.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Entrega, User, Tarea, Aula])],
+  imports: [
+    TypeOrmModule.forFeature([Entrega, User, Tarea, Aula]),
+    AuthModule
+  ],
   controllers: [SubmissionsController, StudentsController],
   providers: [SubmissionsService],
   exports: [SubmissionsService, TypeOrmModule],

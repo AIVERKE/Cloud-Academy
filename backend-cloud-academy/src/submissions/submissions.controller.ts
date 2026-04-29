@@ -3,8 +3,13 @@ import { SubmissionsService } from './submissions.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { GradeSubmissionDto } from './dto/grade-submission.dto';
 import { AuditLog } from '../audit/decorators/audit-log.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolNombre } from '../auth/entities/role.entity';
 
 @Controller('entregas')
+@UseGuards(AuthGuard, RolesGuard)
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
@@ -39,6 +44,7 @@ export class SubmissionsController {
 }
 
 @Controller('estudiantes')
+@UseGuards(AuthGuard, RolesGuard)
 export class StudentsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 

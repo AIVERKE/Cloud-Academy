@@ -22,7 +22,7 @@ export class SubmissionsService {
   ) {}
 
   async create(createSubmissionDto: CreateSubmissionDto): Promise<Entrega> {
-    const { tarea_id, estudiante_id } = createSubmissionDto;
+    const { tarea_id, estudiante_id, google_drive_url } = createSubmissionDto;
 
     // Check if submission already exists
     const existing = await this.entregaRepository.findOne({
@@ -30,19 +30,28 @@ export class SubmissionsService {
     });
 
     if (existing) {
-      // In a real app we might allow updating, but for now we just return it or throw error
-      return existing;
+      // Update existing submission with new URL
+      existing.google_drive_url = google_drive_url;
+      existing.google_drive_file_id = this.extractDriveId(google_drive_url);
+      existing.fecha_entrega = new Date();
+      existing.estado = EstadoEntrega.Pendiente;
+      return await this.entregaRepository.save(existing);
     }
 
     const submission = this.entregaRepository.create({
       tarea_id,
       estudiante_id,
-      google_drive_file_id: '', // Temporary
-      google_drive_url: '', // Temporary
+      google_drive_file_id: this.extractDriveId(google_drive_url),
+      google_drive_url,
       estado: EstadoEntrega.Pendiente,
     });
 
     return await this.entregaRepository.save(submission);
+  }
+
+  private extractDriveId(url: string): string {
+    const match = url.match(/[-\w]{25,}/);
+    return match ? match[0] : '';
   }
 
   async grade(id: string, calificacion: number, docenteId: string): Promise<Entrega> {

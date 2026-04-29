@@ -79,7 +79,8 @@ export const useDataStore = defineStore('data', () => {
         id: a.id,
         name: a.nombre,
         codigo_acceso: a.codigo_acceso,
-        description: a.descripcion || ''
+        description: a.descripcion || '',
+        docente: a.docente ? { id: a.docente.id, name: a.docente.nombre_completo } : undefined
       }));
     } catch (error) {
       console.error('Fetch Classrooms Error:', error);
@@ -159,7 +160,16 @@ export const useDataStore = defineStore('data', () => {
     try {
       const response = await fetch(`http://localhost:3000/entregas/tarea/${tareaId}`);
       if (!response.ok) throw new Error('Error fetching submissions');
-      return await response.json();
+      const data = await response.json();
+      return data.map((e: any) => ({
+        id: e.id,
+        tareaId: e.tarea_id,
+        estudianteNombre: e.estudiante?.nombre_completo || 'Estudiante',
+        google_drive_url: e.google_drive_url,
+        fecha_entrega: e.fecha_entrega,
+        sync_status: e.sync_status,
+        calificacion: e.calificacion
+      }));
     } catch (error) {
       console.error('Fetch Submissions Error:', error);
       return [];
@@ -170,7 +180,13 @@ export const useDataStore = defineStore('data', () => {
     try {
       const response = await fetch(`http://localhost:3000/aulas/${aulaId}/estudiantes`);
       if (!response.ok) throw new Error('Error fetching students');
-      return await response.json();
+      const data = await response.json();
+      return data.map((s: any) => ({
+        id: s.id,
+        name: s.nombre_completo,
+        email: s.email,
+        role: s.role?.nombre || 'Estudiante'
+      }));
     } catch (error) {
       console.error('Fetch Students Error:', error);
       return [];

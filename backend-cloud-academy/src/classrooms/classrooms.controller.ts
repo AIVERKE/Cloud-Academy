@@ -1,11 +1,16 @@
-import { Controller, Post, Get, Body, Param, Headers, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Headers, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ClassroomsService } from './classrooms.service';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { JoinClassroomDto } from './dto/join-classroom.dto';
 import { SubmissionsService } from '../submissions/submissions.service';
 import { AuditLog } from '../audit/decorators/audit-log.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolNombre } from '../auth/entities/role.entity';
 
 @Controller('aulas')
+@UseGuards(AuthGuard, RolesGuard)
 export class ClassroomsController {
   constructor(
     private readonly classroomsService: ClassroomsService,

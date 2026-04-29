@@ -8,4 +8,8 @@ export class CreateSubmissionDto {
   @IsUUID()
   @IsNotEmpty()
   estudiante_id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  google_drive_url: string;
 }
