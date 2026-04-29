@@ -7,6 +7,7 @@ import { User } from '../auth/entities/user.entity';
 import { Tarea } from '../assignments/entities/tarea.entity';
 import { RolNombre } from '../auth/entities/role.entity';
 import { Aula } from '../classrooms/entities/aula.entity';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class SubmissionsService {
@@ -19,6 +20,7 @@ export class SubmissionsService {
     private readonly tareaRepository: Repository<Tarea>,
     @InjectRepository(Aula)
     private readonly aulaRepository: Repository<Aula>,
+    private readonly mailService: MailService,
   ) {}
 
   async create(createSubmissionDto: CreateSubmissionDto): Promise<Entrega> {
@@ -42,7 +44,21 @@ export class SubmissionsService {
       estado: EstadoEntrega.Pendiente,
     });
 
-    return await this.entregaRepository.save(submission);
+    const savedSubmission = await this.entregaRepository.save(submission);
+
+    // Fetch user and task details to send confirmation email
+    const [user, tarea] = await Promise.all([
+      this.userRepository.findOne({ where: { id: estudiante_id } }),
+      this.tareaRepository.findOne({ where: { id: tarea_id } })
+    ]);
+
+    if (user && tarea) {
+      // Fire and forget email sending (asynchronous)
+      this.mailService.sendSubmissionConfirmation(user.email, user.nombre_completo, tarea.titulo)
+        .catch(err => console.error('Error in fire-and-forget email:', err));
+    }
+
+    return savedSubmission;
   }
 
   async grade(id: string, calificacion: number, docenteId: string): Promise<Entrega> {
@@ -138,7 +154,7 @@ export class SubmissionsService {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    const results = [];
+    const results: any[] = [];
 
     for (const aula of student.aulas_inscritas) {
       const tareas = await this.tareaRepository.find({

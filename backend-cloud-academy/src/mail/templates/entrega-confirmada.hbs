@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .header {
+            background-color: #1976D2;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .content h2 {
+            color: #1976D2;
+        }
+        .footer {
+            background-color: #eeeeee;
+            color: #777777;
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cloud Academy</h1>
+        </div>
+        <div class="content">
+            <h2>¡Hola, {{name}}!</h2>
+            <p>Queremos confirmarte que tu tarea <strong>"{{taskTitle}}"</strong> ha sido recibida correctamente.</p>
+            <p>La entrega ya está disponible para revisión en el servidor local de Kallpa.</p>
+            <br>
+            <p>Sigue aprendiendo,</p>
+            <p><strong>El equipo de Cloud Academy</strong></p>
+        </div>
+        <div class="footer">
+            <p>Este es un correo automático, por favor no respondas a esta dirección.</p>
+        </div>
+    </div>
+</body>
+</html>
