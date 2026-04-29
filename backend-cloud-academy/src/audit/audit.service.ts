@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LogAuditoria } from './entities/log-auditoria.entity';
+import { GoogleService } from '../google/google.service';
 
 @Injectable()
 export class AuditService {
@@ -10,6 +11,7 @@ export class AuditService {
   constructor(
     @InjectRepository(LogAuditoria)
     private readonly auditRepository: Repository<LogAuditoria>,
+    private readonly googleService: GoogleService,
   ) {}
 
   private sanitizeBody(body: any): any {
@@ -46,11 +48,28 @@ export class AuditService {
         detalle: sanitizedDetalle,
       });
 
-      await this.auditRepository.save(log);
+      const savedLog = await this.auditRepository.save(log);
+
+      // Sync with Google Sheets in background
+      this.syncWithGoogleSheets(savedLog).catch(err => {
+        this.logger.error(`Failed to sync log to Google Sheets: ${err.message}`);
+      });
+
     } catch (error) {
-      // Silently handle error, but log it to the server console
       this.logger.error(`Failed to create audit log: ${error.message}`, error.stack);
     }
+  }
+
+  private async syncWithGoogleSheets(log: LogAuditoria) {
+    const timestamp = new Date(log.fecha_hora).toLocaleString('es-BO');
+    const values = [
+      timestamp,
+      log.usuario_id || 'SISTEMA',
+      log.accion,
+      JSON.stringify(log.detalle)
+    ];
+
+    await this.googleService.appendRowToSheet(values);
   }
 
   async getLogs(): Promise<LogAuditoria[]> {
