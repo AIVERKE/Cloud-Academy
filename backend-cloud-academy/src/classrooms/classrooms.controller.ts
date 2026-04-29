@@ -32,6 +32,14 @@ export class ClassroomsController {
     return await this.classroomsService.findAll(userId);
   }
 
+  @Get('disponibles')
+  async getAvailableClassrooms(@Headers('user-id') userId: string) {
+    if (!userId || userId === 'undefined') {
+      throw new UnauthorizedException('User ID is required and must be valid');
+    }
+    return await this.classroomsService.getAvailable(userId);
+  }
+
   @Post('unirse')
   async join(
     @Body() joinClassroomDto: JoinClassroomDto,

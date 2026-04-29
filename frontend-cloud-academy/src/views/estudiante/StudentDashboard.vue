@@ -288,7 +288,7 @@ const enroll = async (aula: Classroom) => {
   if (!authStore.user) return;
   enrollingId.value = aula.id;
   try {
-    await dataStore.enrollInClassroom(aula.id, authStore.user.id);
+    await dataStore.enrollInClassroom(aula.codigo_acceso, authStore.user.id);
     showSnackbar(`¡Te inscribiste con éxito en ${aula.name}!`, 'success');
     await loadClassrooms();
     await loadAvailableClassrooms();

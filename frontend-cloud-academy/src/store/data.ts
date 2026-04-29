@@ -253,13 +253,20 @@ export const useDataStore = defineStore('data', () => {
     }
   };
 
-  const enrollInClassroom = async (aulaId: string, userId: string) => {
+  const enrollInClassroom = async (codigoAcceso: string, userId: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/aulas/${aulaId}/inscribirse`, {
+      const response = await fetch(`http://localhost:3000/aulas/unirse`, {
         method: 'POST',
-        headers: { 'user-id': userId }
+        headers: { 
+          'Content-Type': 'application/json',
+          'user-id': userId 
+        },
+        body: JSON.stringify({ codigo_acceso: codigoAcceso })
       });
-      if (!response.ok) throw new Error('Error al inscribirse en el aula');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al inscribirse en el aula');
+      }
       return await response.json();
     } catch (error) {
       console.error('Enroll Error:', error);

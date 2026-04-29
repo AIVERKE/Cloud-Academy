@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { Aula } from './entities/aula.entity';
 import { User } from '../auth/entities/user.entity';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
@@ -90,6 +90,17 @@ export class ClassroomsService {
     }
 
     return aula.estudiantes;
+  }
+
+  async getAvailable(userId: string): Promise<Aula[]> {
+    // Para simplificar, devolvemos todas las aulas donde el usuario NO es el docente
+    // y luego filtramos aquellas donde no está inscrito
+    const allAulas = await this.aulaRepository.find({
+      where: { docente_id: Not(userId) },
+      relations: ['estudiantes', 'docente'],
+    });
+
+    return allAulas.filter(aula => !aula.estudiantes.some(e => e.id === userId));
   }
 
   private generateAccessCode(): string {

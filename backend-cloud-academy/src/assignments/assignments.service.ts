@@ -27,4 +27,12 @@ export class AssignmentsService {
       order: { fecha_creacion: 'DESC' },
     });
   }
+
+  async findByUser(userId: string): Promise<Tarea[]> {
+    return await this.tareaRepository.find({
+      where: { aula: { estudiantes: { id: userId } } },
+      relations: ['aula'],
+      order: { fecha_limite: 'ASC' },
+    });
+  }
 }
