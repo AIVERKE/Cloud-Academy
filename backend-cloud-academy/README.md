@@ -33,16 +33,26 @@ Copia el archivo `.env.example` a `.env` y configura tus credenciales:
 $ cp .env.example .env
 ```
 
-### 4. Base de Datos (Migraciones)
-Este proyecto utiliza migraciones para gestionar el esquema de la base de datos.
+### 4. Base de Datos (Migraciones y Seeders)
+Este proyecto utiliza migraciones para gestionar el esquema y seeders para datos de prueba.
 
-- **Generar una migración**:
-  ```bash
-  $ npm run migration:generate -- src/migrations/[NombreDeLaMigracion]
-  ```
 - **Ejecutar migraciones**:
   ```bash
   $ npm run migration:run
+  ```
+- **Poblar Base de Datos (Seeders)**:
+  Crea usuarios y roles de prueba iniciales.
+  ```bash
+  $ npm run seed:run
+  ```
+- **Reset Completo (Vaciar y Recargar)**:
+  Limpia los datos de todas las tablas (truncate) y vuelve a ejecutar los seeders sin borrar el esquema.
+  ```bash
+  $ npm run db:reset
+  ```
+- **Generar una migración**:
+  ```bash
+  $ npm run migration:generate -- src/migrations/[NombreDeLaMigracion]
   ```
 - **Revertir última migración**:
   ```bash
