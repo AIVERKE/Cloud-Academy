@@ -60,6 +60,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../views/estudiante/SubmissionForm.vue'),
         meta: { role: 'Estudiante' }
       },
+      {
+        path: 'recursos',
+        name: 'Resources',
+        component: () => import('../views/Resources.vue'),
+      },
       // Admin Routes
       {
         path: 'admin/auditoria',

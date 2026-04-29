@@ -7,10 +7,11 @@ import { ClassroomsModule } from './classrooms/classrooms.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { SubmissionsModule } from './submissions/submissions.module';
 import { AuditModule } from './audit/audit.module';
-import { GoogleCloudModule } from './google-cloud/google-cloud.module';
+import { GoogleModule } from './google/google.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { MailModule } from './mail/mail.module';
+import { ResourcesModule } from './resources/resources.module';
 
 @Module({
   imports: [
@@ -22,14 +23,17 @@ import { MailModule } from './mail/mail.module';
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'cloud_academy',
       autoLoadEntities: true,
-      synchronize: true, // Be careful in production!
+      synchronize: false, // Usamos migraciones para mayor seguridad
+
     }),
     AuthModule,
     ClassroomsModule,
     AssignmentsModule,
     SubmissionsModule,
     AuditModule,
-    GoogleCloudModule,
+    GoogleModule,
+    ResourcesModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
