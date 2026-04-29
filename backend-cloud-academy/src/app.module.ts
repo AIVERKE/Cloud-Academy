@@ -7,7 +7,7 @@ import { ClassroomsModule } from './classrooms/classrooms.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { SubmissionsModule } from './submissions/submissions.module';
 import { AuditModule } from './audit/audit.module';
-import { GoogleCloudModule } from './google-cloud/google-cloud.module';
+import { GoogleModule } from './google/google.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuditInterceptor } from './audit/audit.interceptor';
 
@@ -28,7 +28,7 @@ import { AuditInterceptor } from './audit/audit.interceptor';
     AssignmentsModule,
     SubmissionsModule,
     AuditModule,
-    GoogleCloudModule,
+    GoogleModule,
   ],
   controllers: [AppController],
   providers: [
