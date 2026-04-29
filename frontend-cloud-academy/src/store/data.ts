@@ -61,53 +61,116 @@ export const useDataStore = defineStore('data', () => {
   ]);
 
   // Actions with simulated network delay
-  const fetchClassrooms = async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return classrooms.value;
-  };
-
-  const createClassroom = async (classroom: Omit<Classroom, 'id'>) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newClass = { ...classroom, id: Math.random().toString(36).substr(2, 9) };
-    classrooms.value.push(newClass);
-    return newClass;
-  };
-
-  const fetchAssignments = async (aulaId?: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    let result = assignments.value;
-    if (aulaId) {
-      result = result.filter(a => a.aulaId === aulaId);
+  const fetchClassrooms = async (userId: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/aulas', {
+        headers: { 'user-id': userId }
+      });
+      if (!response.ok) throw new Error('Error al obtener aulas');
+      const data = await response.json();
+      // Map backend fields to frontend expected fields
+      return data.map((a: any) => ({
+        id: a.id,
+        name: a.nombre,
+        codigo_acceso: a.codigo_acceso,
+        description: a.descripcion || ''
+      }));
+    } catch (error) {
+      console.error('Fetch Classrooms Error:', error);
+      return [];
     }
-    // Enrich with status for students
-    return result.map(a => {
-        let estado = EstadoEntrega.Pendiente;
-        if (new Date(a.fecha_limite) < new Date()) estado = EstadoEntrega.Atrasado;
-        // Mock checking if submitted
-        if (submissions.value.find(s => s.tareaId === a.id)) estado = EstadoEntrega.Calificado;
-        return { ...a, estado };
-    });
   };
 
-  const createAssignment = async (assignment: Omit<Assignment, 'id'>) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newTask = { ...assignment, id: Math.random().toString(36).substr(2, 9) };
-    assignments.value.push(newTask);
-    return newTask;
+  const createClassroom = async (classroom: Omit<Classroom, 'id'>, userId: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/aulas', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'user-id': userId 
+        },
+        body: JSON.stringify({
+          nombre: classroom.name,
+          codigo_acceso: classroom.codigo_acceso,
+          descripcion: classroom.description
+        })
+      });
+      if (!response.ok) throw new Error('Error al crear aula');
+      return await response.json();
+    } catch (error) {
+      console.error('Create Classroom Error:', error);
+      throw error;
+    }
+  };
+
+  const fetchAssignments = async (aulaId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/aulas/${aulaId}/tareas`);
+      if (!response.ok) throw new Error('Error fetching assignments');
+      return await response.json();
+    } catch (error) {
+      console.error('Fetch Assignments Error:', error);
+      return [];
+    }
+  };
+
+  const createAssignment = async (assignment: { aulaId: string, titulo: string, descripcion: string, fecha_limite: string }) => {
+    try {
+      const response = await fetch(`http://localhost:3000/aulas/${assignment.aulaId}/tareas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: assignment.titulo,
+          descripcion: assignment.descripcion,
+          fecha_limite: assignment.fecha_limite
+        })
+      });
+      if (!response.ok) throw new Error('Error creating assignment');
+      return await response.json();
+    } catch (error) {
+      console.error('Create Assignment Error:', error);
+      throw error;
+    }
   };
 
   const fetchSubmissions = async (tareaId: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return submissions.value.filter(s => s.tareaId === tareaId);
+    try {
+      const response = await fetch(`http://localhost:3000/entregas/tarea/${tareaId}`);
+      if (!response.ok) throw new Error('Error fetching submissions');
+      return await response.json();
+    } catch (error) {
+      console.error('Fetch Submissions Error:', error);
+      return [];
+    }
   };
 
-  const updateSubmissionGrade = async (submissionId: string, grade: number) => {
-     await new Promise(resolve => setTimeout(resolve, 500));
-     const sub = submissions.value.find(s => s.id === submissionId);
-     if (sub) {
-         sub.calificacion = grade;
-         sub.sync_status = SyncStatus.Pendiente_Actualizacion; // Mark as pending sync
-     }
+  const fetchStudents = async (aulaId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/aulas/${aulaId}/estudiantes`);
+      if (!response.ok) throw new Error('Error fetching students');
+      return await response.json();
+    } catch (error) {
+      console.error('Fetch Students Error:', error);
+      return [];
+    }
+  };
+
+  const updateSubmissionGrade = async (submissionId: string, grade: number, userId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/entregas/${submissionId}/calificar`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'user-id': userId
+        },
+        body: JSON.stringify({ calificacion: grade })
+      });
+      if (!response.ok) throw new Error('Error updating grade');
+      return await response.json();
+    } catch (error) {
+      console.error('Update Grade Error:', error);
+      throw error;
+    }
   };
 
   const submitAssignment = async (tareaId: string, url: string, studentName: string) => {
@@ -128,11 +191,67 @@ export const useDataStore = defineStore('data', () => {
     return auditLogs.value;
   };
 
+  const syncDriveResources = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/admin/sync-drive', {
+        method: 'POST'
+      });
+      if (!response.ok) throw new Error('Error al sincronizar');
+      return await response.json();
+    } catch (error) {
+      console.error('Sync Error:', error);
+      return { success: false, error: 'No se pudo conectar con el backend' };
+    }
+  };
+
+  const fetchSheetData = async (sheetId: string) => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Mock data based on the sheetId
+    return [
+      { id: 'usr_001', name: 'Diego (Admin)', email: 'diego@umsa.bo', role: 'Root', timestamp: new Date().toISOString() },
+      { id: 'usr_002', name: 'Jules (Estudiante)', email: 'jules@umsa.bo', role: 'Estudiante', timestamp: new Date().toISOString() },
+    ];
+  };
+
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/admin/stats');
+      if (!response.ok) throw new Error('Error al obtener estadísticas');
+      return await response.json();
+    } catch (error) {
+      console.error('Dashboard Stats Error:', error);
+      return {
+        activeUsers: 0,
+        driveFiles: 0,
+        uptime: '0%',
+        pendingAlerts: 0
+      };
+    }
+  };
+
+  const fetchTeacherStats = async (userId: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/aulas/docente/stats', {
+        headers: { 'user-id': userId }
+      });
+      if (!response.ok) throw new Error('Error al obtener estadísticas de docente');
+      return await response.json();
+    } catch (error) {
+      console.error('Teacher Stats Error:', error);
+      return {
+        activeClassrooms: 0,
+        pendingSubmissions: 0,
+        totalResources: 0,
+        averageGrade: 0
+      };
+    }
+  };
+
   return {
     classrooms, assignments, submissions, auditLogs,
     fetchClassrooms, createClassroom,
     fetchAssignments, createAssignment,
     fetchSubmissions, updateSubmissionGrade, submitAssignment,
-    fetchAuditLogs
+    fetchAuditLogs, syncDriveResources, fetchSheetData, fetchDashboardStats, fetchTeacherStats
   };
 });

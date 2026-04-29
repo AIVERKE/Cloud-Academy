@@ -71,6 +71,18 @@ const routes: RouteRecordRaw[] = [
         name: 'AuditLogs',
         component: () => import('../views/admin/AuditLogs.vue'),
         meta: { role: 'Root' }
+      },
+      {
+        path: 'admin/usuarios',
+        name: 'UserManager',
+        component: () => import('../views/admin/UserManager.vue'),
+        meta: { role: 'Root' }
+      },
+      {
+        path: 'admin/infraestructura',
+        name: 'InfraManager',
+        component: () => import('../views/admin/InfraManager.vue'),
+        meta: { role: 'Root' }
       }
     ]
   }
@@ -81,19 +93,23 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, _from) => {
   const authStore = useAuthStore();
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'Login' });
-  } else if (to.name === 'Login' && authStore.isAuthenticated) {
-    next({ name: 'Home' });
-  } else if (to.meta.role && authStore.user?.role !== to.meta.role) {
+    return { name: 'Login' };
+  } 
+  
+  if (to.name === 'Login' && authStore.isAuthenticated) {
+    return { name: 'Home' };
+  } 
+  
+  if (to.meta.role && authStore.user?.role !== to.meta.role) {
     // Basic RBAC - redirect home if accessing another role's route
-    next({ name: 'Home' });
-  } else {
-    next();
+    return { name: 'Home' };
   }
+  
+  return true;
 });
 
 export default router;

@@ -20,4 +20,11 @@ export class AssignmentsService {
 
     return await this.tareaRepository.save(newTarea);
   }
+
+  async findByAula(aulaId: string): Promise<Tarea[]> {
+    return await this.tareaRepository.find({
+      where: { aula_id: aulaId },
+      order: { fecha_creacion: 'DESC' },
+    });
+  }
 }

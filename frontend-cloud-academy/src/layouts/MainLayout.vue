@@ -1,96 +1,128 @@
 <template>
   <v-app>
-    <!-- Top Navigation Bar -->
-    <v-app-bar class="main-app-bar" elevation="0">
-      <v-app-bar-nav-icon @click="drawer = !drawer" color="white"></v-app-bar-nav-icon>
-
-      <v-app-bar-title class="text-white font-weight-black">
-        CLOUD ACADEMY
-      </v-app-bar-title>
-
-      <v-spacer></v-spacer>
-
-      <!-- Dev Hack: Role Toggle -->
-      <v-menu v-if="authStore.user">
-        <template v-slot:activator="{ props }">
-          <v-btn color="white" v-bind="props" variant="tonal" class="mr-4 glass-btn">
-            {{ authStore.user.role }}
-          </v-btn>
-        </template>
-        <v-list class="rounded-lg mt-2">
-          <v-list-item @click="handleToggleRole('Docente')">
-            <v-list-item-title>Docente</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="handleToggleRole('Estudiante')">
-            <v-list-item-title>Estudiante</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="handleToggleRole('Root')">
-            <v-list-item-title>Root (Admin)</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-
-      <!-- User Avatar & Menu -->
-      <v-menu v-if="authStore.user">
-        <template v-slot:activator="{ props }">
-          <v-btn icon v-bind="props" class="mr-2">
-            <v-avatar size="40" class="elevation-4">
-              <v-img :src="authStore.user.avatar" alt="User"></v-img>
-            </v-avatar>
-          </v-btn>
-        </template>
-
-        <v-card min-width="250" rounded="xl" class="mt-2 elevation-12">
-          <v-list>
-            <v-list-item
-              :prepend-avatar="authStore.user.avatar"
-              :title="authStore.user.name"
-              :subtitle="authStore.user.email"
-              class="pa-4"
-            ></v-list-item>
-          </v-list>
-          <v-divider></v-divider>
-          <v-list nav>
-            <v-list-item @click="handleLogout" color="error" prepend-icon="mdi-logout" title="Cerrar Sesión"></v-list-item>
-          </v-list>
-        </v-card>
-      </v-menu>
-
-      <v-btn v-else to="/login" variant="elevated" color="white" class="mr-4 text-primary font-weight-bold">
-        Ingresar
-      </v-btn>
-    </v-app-bar>
-
-    <!-- Side Navigation Drawer -->
+    <!-- Side Navigation Drawer - DARK THEME -->
     <v-navigation-drawer 
       v-model="drawer" 
-      :permanent="$vuetify.display.mdAndUp"
-      class="sidebar-drawer"
+      permanent
+      class="sidebar-drawer-dark"
       width="280"
+      elevation="10"
     >
-      <div class="pa-6 text-center">
-        <v-icon icon="mdi-cloud-lock" size="48" color="primary" class="mb-2"></v-icon>
-        <div class="text-h6 font-weight-black">API BRIDGE</div>
+      <!-- Brand/Logo Section -->
+      <div class="brand-section pa-8 text-center bg-dark-accent">
+        <div class="logo-container mb-4">
+          <v-icon icon="mdi-cloud-lock" size="48" color="primary" class="entrance-pop"></v-icon>
+          <div class="logo-glow-blue"></div>
+        </div>
+        <div class="text-h6 font-weight-black text-white tracking-tight lh-1">API BRIDGE</div>
+        <div class="text-caption text-primary font-weight-bold ls-1 opacity-90">Cloud Academy Suite</div>
       </div>
 
-      <v-list nav class="px-4">
+      <!-- User Profile Card - Integrated Dark -->
+      <div v-if="authStore.user" class="px-6 mb-6 mt-4">
+        <div class="profile-card-dark pa-4 rounded-xl d-flex align-center">
+          <v-avatar size="44" class="mr-3 profile-avatar-dark">
+            <v-img :src="authStore.user.avatar"></v-img>
+          </v-avatar>
+          <div class="overflow-hidden">
+            <div class="text-caption text-uppercase font-weight-black text-primary ls-1 mb-n1">
+              {{ authStore.user.role }}
+            </div>
+            <div class="text-body-2 font-weight-bold text-white text-truncate">
+              {{ authStore.user.name }}
+            </div>
+          </div>
+          <v-spacer></v-spacer>
+          <v-icon icon="mdi-dots-vertical" size="18" color="white" class="opacity-30"></v-icon>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <v-list nav class="px-4 nav-list-dark">
         <template v-for="item in menuItems" :key="item.title">
           <v-list-item
             :to="item.to"
             :prepend-icon="item.icon"
             :title="item.title"
             exact
-            rounded="xl"
-            class="mb-1 nav-item"
-            active-color="primary"
-          ></v-list-item>
+            rounded="lg"
+            class="mb-2 nav-item-dark py-3"
+            active-class="nav-item-active-dark"
+          >
+            <template v-slot:append v-if="$route.path === item.to">
+              <v-icon icon="mdi-chevron-right" size="16" class="active-arrow"></v-icon>
+            </template>
+          </v-list-item>
         </template>
       </v-list>
+
+      <v-spacer></v-spacer>
+
+      <!-- Bottom Actions -->
+      <template v-slot:append>
+        <div class="pa-6 bottom-actions-dark">
+          <!-- Role Switcher -->
+          <v-menu location="top" offset="12">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                v-bind="props"
+                block
+                variant="outlined"
+                rounded="lg"
+                class="mb-3 text-none role-toggle-btn-dark"
+                color="blue-lighten-3"
+                prepend-icon="mdi-account-convert"
+              >
+                Cambiar Perfil
+              </v-btn>
+            </template>
+            <v-list rounded="xl" class="pa-2 elevation-24 bg-slate-900 border-slate-700">
+              <v-list-subheader class="text-uppercase font-weight-black text-caption px-4 py-2 text-primary">
+                Selector de Roles
+              </v-list-subheader>
+              <v-list-item 
+                v-for="role in (['Docente', 'Estudiante', 'Root'] as Role[])" 
+                :key="role" 
+                @click="handleToggleRole(role)" 
+                :active="authStore.user?.role === role"
+                rounded="lg"
+                class="mb-1 text-white"
+                active-color="primary"
+              >
+                <template v-slot:prepend>
+                  <v-icon :icon="role === 'Root' ? 'mdi-shield-crown' : role === 'Docente' ? 'mdi-school' : 'mdi-account'"></v-icon>
+                </template>
+                <v-list-item-title class="font-weight-bold text-body-2">{{ role }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
+          <!-- Logout Button -->
+          <v-btn
+            block
+            color="primary"
+            variant="elevated"
+            rounded="lg"
+            size="large"
+            prepend-icon="mdi-logout-variant"
+            @click="handleLogout"
+            class="text-none font-weight-bold logout-btn-dark"
+          >
+            Cerrar Sesión
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <!-- Main Content -->
-    <v-main class="bg-slate-50">
-      <router-view></router-view>
+    <v-main class="bg-main-light">
+      <div class="content-wrapper">
+        <router-view v-slot="{ Component }">
+          <transition name="page-fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </div>
     </v-main>
   </v-app>
 </template>
@@ -107,17 +139,19 @@ const drawer = ref(true);
 const menuItems = computed(() => {
   const role = authStore.user?.role;
   const items = [
-    { title: 'Dashboard', icon: 'mdi-view-dashboard', to: '/dashboard' },
-    { title: 'Recursos', icon: 'mdi-folder-google', to: '/dashboard/recursos' }
+    { title: 'Dashboard', icon: 'mdi-view-dashboard-outline', to: '/dashboard' },
+    { title: 'Recursos', icon: 'mdi-folder-open-outline', to: '/dashboard/recursos' }
   ];
 
   if (role === 'Docente') {
     items.splice(1, 0, { title: 'Mis Aulas', icon: 'mdi-google-classroom', to: '/dashboard/docente/aulas' });
   } else if (role === 'Estudiante') {
-    items.splice(1, 0, { title: 'Mis Aulas', icon: 'mdi-google-classroom', to: '/dashboard/estudiante/aulas' });
+    items.splice(1, 0, { title: 'Mis Aulas', icon: 'mdi-school-outline', to: '/dashboard/estudiante/aulas' });
     items.splice(2, 0, { title: 'Mis Tareas', icon: 'mdi-format-list-checks', to: '/dashboard/estudiante/pendientes' });
   } else if (role === 'Root') {
-    items.push({ title: 'Auditoría', icon: 'mdi-shield-check', to: '/dashboard/admin/auditoria' });
+    items.push({ title: 'Gestión Usuarios', icon: 'mdi-account-group-outline', to: '/dashboard/admin/usuarios' });
+    items.push({ title: 'Infraestructura', icon: 'mdi-server-network', to: '/dashboard/admin/infraestructura' });
+    items.push({ title: 'Auditoría', icon: 'mdi-shield-search', to: '/dashboard/admin/auditoria' });
   }
   
   return items;
@@ -125,7 +159,6 @@ const menuItems = computed(() => {
 
 const handleToggleRole = (role: Role) => {
   authStore.toggleRole(role);
-  // Force re-evaluation of home route redirect
   router.push('/dashboard');
 };
 
@@ -136,31 +169,107 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-.main-app-bar {
-  background: linear-gradient(90deg, #1e293b 0%, #334155 100%) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+/* Sidebar Dark Theme */
+.sidebar-drawer-dark {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+  color: white !important;
+  border-right: none !important;
 }
 
-.glass-btn {
-  background: rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.bg-dark-accent {
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.sidebar-drawer {
-  border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
+/* Logo Section */
+.logo-glow-blue {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background: #3b82f6;
+  filter: blur(30px);
+  opacity: 0.2;
+  z-index: -1;
 }
 
-.nav-item {
-  transition: all 0.2s ease;
+/* Profile Card Dark */
+.profile-card-dark {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+.profile-avatar-dark {
+  border: 2px solid rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
-.nav-item:hover {
-  background: rgba(var(--v-theme-primary), 0.05);
-  transform: translateX(5px);
+/* Nav List Dark */
+.nav-item-dark {
+  color: #94a3b8 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bg-slate-50 {
-  background-color: #f8fafc;
+.nav-item-dark:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: white !important;
+  transform: translateX(4px);
 }
+
+:deep(.nav-item-active-dark) {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0) 100%) !important;
+  color: #60a5fa !important;
+  border-left: 4px solid #3b82f6 !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-weight: 700 !important;
+}
+
+:deep(.nav-item-active-dark .v-icon) {
+  color: #60a5fa !important;
+}
+
+.active-arrow {
+  opacity: 0.5;
+}
+
+/* Bottom Actions Dark */
+.bottom-actions-dark {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.role-toggle-btn-dark {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  font-size: 0.85rem;
+}
+.logout-btn-dark {
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Main Layout Styles */
+.bg-main-light {
+  background-color: #f1f5f9 !important;
+}
+.content-wrapper {
+  padding: 24px;
+}
+
+/* Transitions */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: all 0.3s ease;
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Global Utility Classes */
+.lh-1 { line-height: 1; }
+.ls-1 { letter-spacing: 1px; }
+.bg-slate-900 { background-color: #0f172a !important; }
+.border-slate-700 { border: 1px solid #334155 !important; }
 </style>

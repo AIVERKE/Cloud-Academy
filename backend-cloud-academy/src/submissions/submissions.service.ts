@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Entrega, EstadoEntrega } from './entities/entrega.entity';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { User } from '../auth/entities/user.entity';
@@ -76,6 +76,14 @@ export class SubmissionsService {
     return await this.entregaRepository.save(submission);
   }
 
+  async findByTarea(tareaId: string): Promise<Entrega[]> {
+    return await this.entregaRepository.find({
+      where: { tarea_id: tareaId },
+      relations: ['estudiante'],
+      order: { fecha_entrega: 'DESC' },
+    });
+  }
+
   async getTeacherDashboard(aulaId: string) {
     const aula = await this.aulaRepository.findOne({
       where: { id: aulaId },
@@ -125,6 +133,48 @@ export class SubmissionsService {
     );
 
     return dashboard;
+  }
+
+  async getGlobalTeacherStats(docenteId: string) {
+    const aulas = await this.aulaRepository.find({
+      where: { docente_id: docenteId },
+    });
+
+    const aulaIds = aulas.map((a) => a.id);
+
+    if (aulaIds.length === 0) {
+      return {
+        activeClassrooms: 0,
+        pendingSubmissions: 0,
+        totalResources: 0,
+        averageGrade: 0,
+      };
+    }
+
+    const pendingSubmissions = await this.entregaRepository.count({
+      where: {
+        tarea: { aula_id: In(aulaIds) },
+        estado: EstadoEntrega.Pendiente,
+      },
+    });
+
+    const gradedSubmissions = await this.entregaRepository.find({
+      where: {
+        tarea: { aula_id: In(aulaIds) },
+        estado: EstadoEntrega.Calificado,
+      },
+    });
+
+    const averageGrade = gradedSubmissions.length > 0
+      ? gradedSubmissions.reduce((acc, curr) => acc + Number(curr.calificacion), 0) / gradedSubmissions.length
+      : 0;
+
+    return {
+      activeClassrooms: aulas.length,
+      pendingSubmissions,
+      totalResources: 28, // Mocked as per frontend request
+      averageGrade: Math.round(averageGrade * 10) / 10 || 0,
+    };
   }
 
   async getStudentTasks(estudianteId: string) {

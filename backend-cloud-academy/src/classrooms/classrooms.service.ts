@@ -16,16 +16,29 @@ export class ClassroomsService {
   ) {}
 
   async create(createClassroomDto: CreateClassroomDto, docenteId: string): Promise<Aula> {
-    const { nombre } = createClassroomDto;
-    const codigo_acceso = this.generateAccessCode();
+    const { nombre, codigo_acceso, descripcion } = createClassroomDto;
 
-    const newAula = this.aulaRepository.create({
-      nombre,
-      codigo_acceso,
-      docente_id: docenteId,
-    });
+    // Verificar si ya existe un aula con ese código
+    const existingAula = await this.aulaRepository.findOne({ where: { codigo_acceso } });
+    if (existingAula) {
+      throw new ConflictException(`El código de acceso "${codigo_acceso}" ya está en uso.`);
+    }
 
-    return await this.aulaRepository.save(newAula);
+    try {
+      const newAula = this.aulaRepository.create({
+        nombre,
+        codigo_acceso,
+        descripcion,
+        docente_id: docenteId,
+      });
+
+      return await this.aulaRepository.save(newAula);
+    } catch (error) {
+      if (error.code === '23503') { // Foreign key violation
+        throw new NotFoundException('El docente especificado no existe en el sistema.');
+      }
+      throw error;
+    }
   }
 
   async findAll(userId: string): Promise<Aula[]> {
@@ -64,6 +77,19 @@ export class ClassroomsService {
 
     aula.estudiantes.push(estudiante);
     return await this.aulaRepository.save(aula);
+  }
+
+  async getStudents(aulaId: string): Promise<User[]> {
+    const aula = await this.aulaRepository.findOne({
+      where: { id: aulaId },
+      relations: ['estudiantes'],
+    });
+
+    if (!aula) {
+      throw new NotFoundException(`Aula con ID ${aulaId} no encontrada`);
+    }
+
+    return aula.estudiantes;
   }
 
   private generateAccessCode(): string {

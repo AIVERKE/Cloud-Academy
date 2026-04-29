@@ -2,11 +2,13 @@ import { Controller, Post, Put, Get, Body, Param, Headers, UnauthorizedException
 import { SubmissionsService } from './submissions.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { GradeSubmissionDto } from './dto/grade-submission.dto';
+import { AuditLog } from '../audit/decorators/audit-log.decorator';
 
 @Controller('entregas')
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
+  @AuditLog('SUBMIT_ASSIGNMENT')
   @Post()
   async create(@Body() createSubmissionDto: CreateSubmissionDto) {
     return await this.submissionsService.create(createSubmissionDto);
@@ -18,10 +20,15 @@ export class SubmissionsController {
     @Body() gradeSubmissionDto: GradeSubmissionDto,
     @Headers('user-id') userId: string,
   ) {
-    if (!userId) {
-      throw new UnauthorizedException('User ID is required in headers (temporary)');
+    if (!userId || userId === 'undefined') {
+      throw new UnauthorizedException('User ID is required and must be valid');
     }
     return await this.submissionsService.grade(id, gradeSubmissionDto.calificacion, userId);
+  }
+
+  @Get('tarea/:tarea_id')
+  async findByTarea(@Param('tarea_id') tareaId: string) {
+    return await this.submissionsService.findByTarea(tareaId);
   }
 
   // Note: This endpoint matches the requirement GET /estudiantes/:id/mis-tareas
