@@ -21,34 +21,34 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserData | null>(initialUser);
 
   const login = async (email: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const response = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
 
-    // Assign role based on email or default to Estudiante
-    let role: Role = 'Estudiante';
-    let id = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380101'; // Default Student ID
-    
-    if (email.includes('docente')) {
-      role = 'Docente';
-      id = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380002'; // Teacher ID used in seeds
-    } else if (email.includes('admin') || email.includes('root')) {
-      role = 'Root';
-      id = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380001'; // Root ID used in seeds
+      if (!response.ok) throw new Error('Error de autenticación');
+      
+      const data = await response.json();
+      
+      const userData: UserData = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        avatar: 'https://cdn.vuetifyjs.com/images/john.jpg'
+      };
+
+      isAuthenticated.value = true;
+      user.value = userData;
+
+      // Save to localStorage
+      localStorage.setItem('ca_user', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Login Error:', error);
+      throw error;
     }
-
-    const userData: UserData = {
-      id,
-      name: email.split('@')[0],
-      email,
-      role,
-      avatar: 'https://cdn.vuetifyjs.com/images/john.jpg'
-    };
-
-    isAuthenticated.value = true;
-    user.value = userData;
-
-    // Save to localStorage
-    localStorage.setItem('ca_user', JSON.stringify(userData));
   };
 
   const logout = () => {

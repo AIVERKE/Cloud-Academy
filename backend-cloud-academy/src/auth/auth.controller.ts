@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Delete, Param, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuditLog } from '../audit/decorators/audit-log.decorator';
 
@@ -9,7 +9,20 @@ export class AuthController {
   @AuditLog('LOGIN')
   @Post('login')
   async login(@Body() credentials: { email: string }) {
-    return { success: true, message: 'Login tracked' };
+    const user = await this.authService.findByEmail(credentials.email);
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+    return { 
+      success: true, 
+      message: 'Login tracked',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.nombre_completo,
+        role: user.role?.nombre || 'Estudiante'
+      }
+    };
   }
 
   @Post('register-test')
