@@ -270,7 +270,8 @@ export const useDataStore = defineStore('data', () => {
   const syncDriveResources = async () => {
     try {
       const response = await fetch('http://localhost:3000/admin/sync-drive', {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'user-id': authStore.user?.id || '' }
       });
       if (!response.ok) throw new Error('Error al sincronizar');
       return await response.json();
@@ -280,28 +281,92 @@ export const useDataStore = defineStore('data', () => {
     }
   };
 
-  const fetchSheetData = async (_sheetId: string) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Mock data based on the sheetId
-    return [
-      { id: 'usr_001', name: 'Diego (Admin)', email: 'diego@umsa.bo', role: 'Root', timestamp: new Date().toISOString() },
-      { id: 'usr_002', name: 'Jules (Estudiante)', email: 'jules@umsa.bo', role: 'Estudiante', timestamp: new Date().toISOString() },
-    ];
+  const fetchLastSyncTime = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/admin/last-sync', {
+        headers: { 'user-id': authStore.user?.id || '' }
+      });
+      if (!response.ok) throw new Error('Error fetching last sync');
+      const { timestamp } = await response.json();
+      return timestamp;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+
+  const fetchSheetData = async (spreadsheetId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/admin/sheet-data?spreadsheetId=${spreadsheetId}`, {
+        headers: { 'user-id': authStore.user?.id || '' }
+      });
+      if (!response.ok) throw new Error('Error fetching sheet data');
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const exportLogsToSheet = async (spreadsheetId: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/admin/export-logs', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'user-id': authStore.user?.id || ''
+        },
+        body: JSON.stringify({ spreadsheetId })
+      });
+      if (!response.ok) throw new Error('Error exporting logs');
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   };
 
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('http://localhost:3000/admin/stats');
-      if (!response.ok) throw new Error('Error al obtener estadísticas');
+      const response = await fetch('http://localhost:3000/admin/stats', {
+        headers: { 'user-id': authStore.user?.id || '' }
+      });
+      if (!response.ok) throw new Error('Error fetching admin stats');
       return await response.json();
     } catch (error) {
-      console.error('Dashboard Stats Error:', error);
-      return {
-        activeUsers: 0,
-        driveFiles: 0,
-        uptime: '0%',
-        pendingAlerts: 0
-      };
+      console.error(error);
+      return { activeUsers: 0, driveFiles: 0, uptime: '99.9%', pendingAlerts: 0, activities: [] };
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/auth/usuarios');
+      if (!response.ok) throw new Error('Error fetching users');
+      const data = await response.json();
+      return data.map((u: any) => ({
+        id: u.id,
+        name: u.nombre_completo,
+        email: u.email,
+        role: u.role?.nombre || 'Estudiante',
+        avatar: `https://i.pravatar.cc/150?u=${u.id}`
+      }));
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/auth/usuarios/${userId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Error deleting user');
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
     }
   };
 
@@ -328,7 +393,9 @@ export const useDataStore = defineStore('data', () => {
     fetchClassrooms, createClassroom,
     fetchAssignments, createAssignment,
     fetchSubmissions, updateSubmissionGrade, submitAssignment,
-    fetchAuditLogs, syncDriveResources, fetchSheetData, fetchDashboardStats, fetchTeacherStats,
-    fetchAvailableClassrooms, enrollInClassroom, fetchStudents
+    fetchAuditLogs, syncDriveResources, fetchLastSyncTime, fetchSheetData, fetchDashboardStats, fetchTeacherStats,
+    exportLogsToSheet,
+    fetchAvailableClassrooms, enrollInClassroom, fetchStudents,
+    fetchUsers, deleteUser
   };
 });

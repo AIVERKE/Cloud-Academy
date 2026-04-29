@@ -211,6 +211,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { useDataStore } from '../../store/data';
+
+const dataStore = useDataStore();
 
 interface User {
   id: string;
@@ -260,16 +263,8 @@ const stats = computed(() => [
 
 const fetchUsers = async () => {
   loading.value = true;
-  // Simular Fetch
-  setTimeout(() => {
-    users.value = [
-      { id: '1', name: 'Diego (Admin)', email: 'diego@cloudacademy.com', role: 'Root', avatar: 'https://i.pravatar.cc/150?u=1' },
-      { id: '2', name: 'Alejandro (Admin)', email: 'alejandro@cloudacademy.com', role: 'Root', avatar: 'https://i.pravatar.cc/150?u=2' },
-      { id: '3', name: 'Estudiante de Prueba', email: 'estudiante1@cloudacademy.com', role: 'Estudiante', avatar: 'https://i.pravatar.cc/150?u=3' },
-      { id: '4', name: 'Profesor de Prueba', email: 'docente1@cloudacademy.com', role: 'Docente', avatar: 'https://i.pravatar.cc/150?u=4' },
-    ];
-    loading.value = false;
-  }, 500);
+  users.value = await dataStore.fetchUsers();
+  loading.value = false;
 };
 
 const syncWithSheets = () => {
@@ -313,13 +308,17 @@ const openDialog = (item?: User) => {
   dialog.value = true;
 };
 
-const confirmDelete = (item: User) => {
-  editedIndex.value = users.value.indexOf(item);
-  editedItem.value = Object.assign({}, item);
-  dialogDelete.value = true;
+const confirmDelete = async (item: User) => {
+  if (confirm(`¿Estás seguro de que deseas eliminar a ${item.name}?`)) {
+    const success = await dataStore.deleteUser(item.id);
+    if (success) {
+      fetchUsers();
+    }
+  }
 };
 
 const save = () => {
+  // TODO: Implement save logic in backend if needed
   if (editedIndex.value > -1) {
     Object.assign(users.value[editedIndex.value], editedItem.value);
   } else {

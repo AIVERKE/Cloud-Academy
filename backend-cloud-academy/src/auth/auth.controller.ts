@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Delete, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuditLog } from '../audit/decorators/audit-log.decorator';
 
@@ -15,5 +15,15 @@ export class AuthController {
   @Post('register-test')
   async registerTest(@Body() userData: { google_id: string; nombre_completo: string; email: string }) {
     return this.authService.registerStudent(userData);
+  }
+
+  @Get('usuarios')
+  async findAll() {
+    return this.authService.findAll();
+  }
+
+  @Delete('usuarios/:id')
+  async remove(@Param('id') id: string) {
+    return this.authService.remove(id);
   }
 }

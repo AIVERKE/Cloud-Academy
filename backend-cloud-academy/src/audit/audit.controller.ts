@@ -5,13 +5,15 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { RolNombre } from '../auth/entities/role.entity';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+import { AuthGuard } from '../auth/guards/auth.guard';
+
 @ApiTags('auditoria')
 @Controller('auditoria')
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
   @Get()
-  @UseGuards(RolesGuard)
+  @UseGuards(AuthGuard, RolesGuard)
   @Roles(RolNombre.Root)
   @ApiOperation({ summary: 'Obtener el historial de auditoría' })
   @ApiResponse({

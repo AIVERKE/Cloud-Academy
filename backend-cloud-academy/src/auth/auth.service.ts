@@ -69,13 +69,17 @@ export class AuthService implements OnModuleInit {
   async syncUserToSheets(user: User, roleName: string) {
     try {
       this.logger.log(`Sincronizando usuario ${user.email} con Google Sheets...`);
-      await this.googleService.appendRowToSheet([
-        user.id,
-        user.nombre_completo,
-        user.email,
-        roleName,
-        new Date().toISOString(),
-      ]);
+      await this.googleService.appendRowToSheet(
+        process.env.GOOGLE_SHEET_ID || '',
+        'Hoja 1!A:E',
+        [
+          user.id,
+          user.nombre_completo,
+          user.email,
+          roleName,
+          new Date().toISOString(),
+        ],
+      );
     } catch (error) {
       this.logger.error('Fallo en sincronización con Sheets', error);
     }
@@ -87,5 +91,17 @@ export class AuthService implements OnModuleInit {
 
   async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email }, relations: ['role'] });
+  }
+
+  async findAll() {
+    return this.userRepository.find({ relations: ['role'] });
+  }
+
+  async findOne(id: string) {
+    return this.userRepository.findOne({ where: { id }, relations: ['role'] });
+  }
+
+  async remove(id: string) {
+    return this.userRepository.delete(id);
   }
 }

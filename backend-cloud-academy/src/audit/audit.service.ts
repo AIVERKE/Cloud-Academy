@@ -69,7 +69,7 @@ export class AuditService {
       JSON.stringify(log.detalle)
     ];
 
-    await this.googleService.appendRowToSheet(values);
+    await this.googleService.appendRowToSheet(process.env.GOOGLE_SHEET_ID || '', 'Hoja 1!A:D', values);
   }
 
   async getLogs(): Promise<LogAuditoria[]> {

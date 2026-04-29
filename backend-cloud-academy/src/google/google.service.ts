@@ -81,25 +81,32 @@ export class GoogleService {
   /**
    * Agrega una fila a una hoja de Google Sheets
    */
-  async appendRowToSheet(values: any[]) {
+  async appendRowToSheet(spreadsheetId: string, range: string, values: any[]) {
     try {
-      const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-      if (!spreadsheetId) {
-        throw new Error('GOOGLE_SHEET_ID no está configurado en el .env');
-      }
-
       const response = await this.sheets.spreadsheets.values.append({
-        spreadsheetId: spreadsheetId,
-        range: 'Hoja 1!A:D', 
+        spreadsheetId,
+        range,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
           values: [values],
         },
       });
-      this.logger.log('Fila agregada exitosamente al Google Sheet');
       return response.data;
     } catch (error) {
-      this.logger.error('Error escribiendo en Sheets', error);
+      console.error('Error appending row to sheet:', error);
+      throw error;
+    }
+  }
+
+  async getSheetData(spreadsheetId: string, range: string) {
+    try {
+      const response = await this.sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+      return response.data.values;
+    } catch (error) {
+      console.error('Error getting sheet data:', error);
       throw error;
     }
   }

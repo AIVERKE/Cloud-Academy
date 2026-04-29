@@ -5,6 +5,7 @@ import { User } from '../auth/entities/user.entity';
 import { Resource } from '../resources/entities/resource.entity';
 import { LogAuditoria } from '../audit/entities/log-auditoria.entity';
 import { ResourcesService } from '../resources/resources.service';
+import { GoogleService } from '../google/google.service';
 
 @Injectable()
 export class AdminService {
@@ -16,10 +17,58 @@ export class AdminService {
     @InjectRepository(LogAuditoria)
     private readonly auditRepository: Repository<LogAuditoria>,
     private readonly resourcesService: ResourcesService,
+    private readonly googleService: GoogleService,
   ) {}
 
   async syncDrive() {
     return await this.resourcesService.syncResources();
+  }
+
+  async getLastSyncTime() {
+    const lastSync = await this.auditRepository.findOne({
+      where: { accion: 'SYNC_DRIVE' },
+      order: { fecha_hora: 'DESC' },
+    });
+    return lastSync ? lastSync.fecha_hora : null;
+  }
+
+  async getSheetData(spreadsheetId: string) {
+    if (!spreadsheetId) return [];
+    try {
+      // Intentamos leer la primera hoja
+      const data = await this.googleService.getSheetData(spreadsheetId, 'Hoja 1!A1:Z100');
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching sheet data:', error);
+      return [];
+    }
+  }
+
+  async exportLogsToSheet(spreadsheetId: string) {
+    if (!spreadsheetId) throw new Error('No Spreadsheet ID provided');
+
+    const logs = await this.auditRepository.find({
+      order: { fecha_hora: 'DESC' },
+      take: 50,
+      relations: ['usuario'],
+    });
+
+    const header = ['Fecha', 'Usuario', 'Acción', 'Detalle'];
+    
+    // Si la hoja está vacía, podríamos querer poner el header. 
+    // Por simplicidad, vamos a append cada log como una nueva fila.
+    
+    for (const log of logs) {
+      const row = [
+        log.fecha_hora.toISOString(),
+        log.usuario?.email || 'Sistema',
+        log.accion,
+        JSON.stringify(log.detalle),
+      ];
+      await this.googleService.appendRowToSheet(spreadsheetId, 'Hoja 1!A:D', row);
+    }
+
+    return { success: true, count: logs.length };
   }
 
   async getDashboardStats() {

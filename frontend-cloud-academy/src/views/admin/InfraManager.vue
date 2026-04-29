@@ -72,23 +72,36 @@
               </template>
             </v-text-field>
 
-            <div class="d-flex gap-4">
+            <div class="d-flex flex-column gap-2">
+              <div class="d-flex gap-4">
+                <v-btn
+                  variant="tonal"
+                  color="secondary"
+                  prepend-icon="mdi-table-edit"
+                  @click="handleFetchSheet"
+                  class="flex-grow-1"
+                >
+                  Explorar Sheet
+                </v-btn>
+                <v-btn
+                  variant="flat"
+                  color="success"
+                  prepend-icon="mdi-check-circle"
+                  @click="saveConfig"
+                >
+                  Guardar
+                </v-btn>
+              </div>
               <v-btn
-                variant="tonal"
-                color="secondary"
-                prepend-icon="mdi-table-edit"
-                @click="handleFetchSheet"
-                class="flex-grow-1"
+                block
+                color="info"
+                variant="outlined"
+                prepend-icon="mdi-export"
+                @click="handleExportLogs"
+                class="rounded-xl font-weight-bold"
+                :loading="exporting"
               >
-                Explorar Datos
-              </v-btn>
-              <v-btn
-                variant="flat"
-                color="success"
-                prepend-icon="mdi-check-circle"
-                @click="saveConfig"
-              >
-                Guardar
+                Exportar Datos (Logs)
               </v-btn>
             </div>
           </v-card-text>
@@ -130,7 +143,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useDataStore } from '../../store/data';
 
 const dataStore = useDataStore();
@@ -140,13 +153,24 @@ const lastSync = ref('');
 const sheetId = ref('1A2B3C4D5E6F7G8H9I0J_K_L_M_N_O_P');
 const showEditor = ref(false);
 const loadingSheet = ref(false);
+const exporting = ref(false);
+
+const loadLastSync = async () => {
+  const timestamp = await dataStore.fetchLastSyncTime();
+  if (timestamp) {
+    lastSync.value = new Date(timestamp).toLocaleString();
+  }
+};
+
+onMounted(() => {
+  loadLastSync();
+});
 
 const sheetHeaders: any = [
-  { title: 'UUID', key: 'id' },
-  { title: 'Nombre', key: 'name' },
-  { title: 'Email', key: 'email' },
-  { title: 'Rol', key: 'role' },
-  { title: 'Timestamp', key: 'timestamp' },
+  { title: 'Dato A', key: '0' },
+  { title: 'Dato B', key: '1' },
+  { title: 'Dato C', key: '2' },
+  { title: 'Dato D', key: '3' },
 ];
 
 const sheetRows = ref<any[]>([]);
@@ -159,9 +183,9 @@ const handleSync = async () => {
     const result = await dataStore.syncDriveResources();
     syncStatus.value = {
       type: 'success',
-      message: `Sincronización completada: ${result.count} recursos procesados correctamente.`
+      message: `Sincronización completada: ${result.creados + result.actualizados} recursos procesados correctamente.`
     };
-    lastSync.value = new Date().toLocaleString();
+    await loadLastSync();
   } catch (error) {
     syncStatus.value = { type: 'error', message: 'Error en la sincronización con Google Drive.' };
   } finally {
@@ -173,11 +197,31 @@ const handleFetchSheet = async () => {
   loadingSheet.value = true;
   showEditor.value = true;
   try {
-    sheetRows.value = await dataStore.fetchSheetData(sheetId.value);
+    const data = await dataStore.fetchSheetData(sheetId.value);
+    // data es string[][], lo convertimos a objetos para el data-table
+    sheetRows.value = data.map((row: any) => {
+      const obj: any = {};
+      row.forEach((cell: any, index: number) => {
+        obj[index.toString()] = cell;
+      });
+      return obj;
+    });
   } catch (error) {
     console.error(error);
   } finally {
     loadingSheet.value = false;
+  }
+};
+
+const handleExportLogs = async () => {
+  exporting.value = true;
+  try {
+    await dataStore.exportLogsToSheet(sheetId.value);
+    alert('Logs exportados exitosamente a Google Sheets.');
+  } catch (error) {
+    alert('Error al exportar logs. Verifica el Spreadsheet ID.');
+  } finally {
+    exporting.value = false;
   }
 };
 
