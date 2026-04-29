@@ -17,31 +17,6 @@ export class AuthService implements OnModuleInit {
     private readonly googleService: GoogleService,
   ) {}
 
-  async onModuleInit() {
-    // Si el entorno permite seeding (podemos chequear una variable de entorno)
-    if (process.env.SEED_DATA === 'true') {
-      await this.seedData();
-    }
-  }
-
-  async seedData() {
-    this.logger.log('Iniciando Seeding de datos de prueba...');
-    
-    const usersToSeed = [
-      { google_id: '1001', nombre_completo: 'Diego (Admin)', email: 'diego@umsa.bo', rol: RolNombre.Root },
-      { google_id: '1002', nombre_completo: 'Alejandro (Admin)', email: 'alejandro@umsa.bo', rol: RolNombre.Root },
-      { google_id: '1003', nombre_completo: 'Jules (Estudiante)', email: 'jules@umsa.bo', rol: RolNombre.Estudiante },
-    ];
-
-    for (const u of usersToSeed) {
-      const existing = await this.userRepository.findOne({ where: { email: u.email } });
-      if (!existing) {
-        await this.registerUserWithRole(u.google_id, u.nombre_completo, u.email, u.rol);
-      }
-    }
-    this.logger.log('Seeding completado con éxito.');
-  }
-
   async registerUserWithRole(google_id: string, nombre_completo: string, email: string, rolNombre: RolNombre) {
     let role = await this.roleRepository.findOne({ where: { nombre: rolNombre } });
     if (!role) {

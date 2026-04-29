@@ -20,11 +20,11 @@ export default class UserSeeder implements Seeder {
     const testPassword = 'Password123!';
 
     // 1. Root User
-    const rootExists = await userRepository.findOneBy({ email: 'root@cloudacademy.com' });
+    const rootExists = await userRepository.findOneBy({ email: 'root@gmail.com' });
     if (!rootExists) {
       await userRepository.save(userRepository.create({
         nombre_completo: 'Administrador Root',
-        email: 'root@cloudacademy.com',
+        email: 'root@gmail.com',
         google_id: 'root-google-id',
         rol_id: roleMap[RolNombre.Root],
         password: testPassword,
@@ -33,7 +33,7 @@ export default class UserSeeder implements Seeder {
 
     // 2. Docentes (5)
     for (let i = 1; i <= 5; i++) {
-      const email = `docente${i}@cloudacademy.com`;
+      const email = `docente${i}@gmail.com`;
       const exists = await userRepository.findOneBy({ email });
       if (!exists) {
         await userRepository.save(userRepository.create({
@@ -48,7 +48,7 @@ export default class UserSeeder implements Seeder {
 
     // 3. Estudiantes (20)
     for (let i = 1; i <= 20; i++) {
-      const email = `estudiante${i}@cloudacademy.com`;
+      const email = `estudiante${i}@gmail.com`;
       const exists = await userRepository.findOneBy({ email });
       if (!exists) {
         await userRepository.save(userRepository.create({
