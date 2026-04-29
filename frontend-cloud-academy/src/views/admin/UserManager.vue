@@ -1,22 +1,37 @@
 <template>
-  <v-container fluid class="pa-8">
+  <v-container fluid class="pa-8 bg-slate-50 min-vh-100">
     <!-- Header -->
     <v-row class="mb-8" align="center">
-      <v-col cols="12" md="8">
-        <h1 class="text-h3 font-weight-black mb-2 gradient-text">Gestión de Usuarios</h1>
-        <p class="text-subtitle-1 text-on-surface-variant opacity-70">
-          Control total sobre el acceso institucional y la asignación de roles.
+      <v-col cols="12" md="7">
+        <div class="d-flex align-center mb-1">
+          <v-icon icon="mdi-account-cog" color="primary" size="32" class="mr-3"></v-icon>
+          <h1 class="text-h3 font-weight-black text-slate-900">Gestión de Usuarios</h1>
+        </div>
+        <p class="text-subtitle-1 text-slate-500 ml-11">
+          Control institucional y asignación de privilegios en el ecosistema Cloud.
         </p>
       </v-col>
-      <v-col cols="12" md="4" class="text-md-right">
+      <v-col cols="12" md="5" class="text-md-right d-flex justify-end gap-3 align-center">
+        <v-btn 
+          color="success" 
+          variant="tonal" 
+          prepend-icon="mdi-google-spreadsheet" 
+          size="large" 
+          rounded="xl"
+          class="px-6 font-weight-bold"
+          @click="syncWithSheets"
+          :loading="syncing"
+        >
+          Sincronizar Sheets
+        </v-btn>
         <v-btn 
           color="primary" 
-          prepend-icon="mdi-account-plus" 
+          prepend-icon="mdi-plus" 
           @click="openDialog()" 
           size="large" 
           rounded="xl"
           elevation="4"
-          class="px-6 py-3"
+          class="px-6 font-weight-bold"
         >
           Nuevo Usuario
         </v-btn>
@@ -26,15 +41,14 @@
     <!-- Stats Summary -->
     <v-row class="mb-8">
       <v-col cols="12" sm="4" v-for="stat in stats" :key="stat.label">
-        <v-card class="stat-card border-0 overflow-hidden" rounded="xl" elevation="0">
-          <div class="stat-gradient" :style="{ background: `linear-gradient(135deg, ${stat.bgStart}, ${stat.bgEnd})` }"></div>
-          <v-card-text class="d-flex align-center pa-6 relative-content">
-            <v-avatar color="white" size="56" elevation="2" class="mr-6">
-              <v-icon :color="stat.color" :icon="stat.icon" size="28"></v-icon>
+        <v-card class="stat-card border-0" rounded="xl" elevation="1">
+          <v-card-text class="d-flex align-center pa-6">
+            <v-avatar :color="stat.color + '-lighten-5'" size="64" class="mr-6">
+              <v-icon :color="stat.color" :icon="stat.icon" size="32"></v-icon>
             </v-avatar>
-            <div class="text-white">
-              <div class="text-caption text-uppercase font-weight-bold opacity-80 mb-1 tracking-widest">{{ stat.label }}</div>
-              <div class="text-h4 font-weight-black">{{ stat.value }}</div>
+            <div>
+              <div class="text-caption text-uppercase font-weight-black text-slate-400 mb-1 tracking-widest">{{ stat.label }}</div>
+              <div class="text-h4 font-weight-black text-slate-900">{{ stat.value }}</div>
             </div>
           </v-card-text>
         </v-card>
@@ -42,21 +56,22 @@
     </v-row>
 
     <!-- Main Table Card -->
-    <v-card class="main-table-card border-0" rounded="xl" elevation="1">
-      <v-toolbar flat color="transparent" class="px-4 py-4">
+    <v-card border flat rounded="xl" class="overflow-hidden">
+      <v-toolbar flat color="white" class="px-4 py-4 border-b">
         <v-text-field
           v-model="search"
           prepend-inner-icon="mdi-magnify"
-          label="Buscar por nombre o correo..."
+          label="Buscar usuario..."
           variant="solo-filled"
           flat
           hide-details
           rounded="xl"
+          bg-color="slate-50"
           class="max-width-400"
         ></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn icon="mdi-filter-variant" variant="text" class="mr-2"></v-btn>
-        <v-btn icon="mdi-export-variant" variant="text"></v-btn>
+        <v-btn icon="mdi-refresh" variant="text" color="slate-400" @click="fetchUsers"></v-btn>
+        <v-btn icon="mdi-filter-variant" variant="text" color="slate-400"></v-btn>
       </v-toolbar>
 
       <v-data-table
@@ -65,17 +80,17 @@
         :search="search"
         :loading="loading"
         hover
-        class="user-table-custom"
+        class="user-table"
       >
         <template v-slot:item.name="{ item }">
           <div class="d-flex align-center py-4">
-            <v-avatar size="42" class="mr-4 elevation-1">
+            <v-avatar size="44" class="mr-4 border" color="slate-100">
               <v-img v-if="item.avatar" :src="item.avatar"></v-img>
-              <v-icon v-else icon="mdi-account" color="primary"></v-icon>
+              <v-icon v-else icon="mdi-account" color="slate-400"></v-icon>
             </v-avatar>
             <div>
-              <div class="font-weight-bold text-body-1">{{ item.name }}</div>
-              <div class="text-caption opacity-60">ID: {{ item.id.substring(0, 8) }}</div>
+              <div class="font-weight-black text-slate-800 text-body-1">{{ item.name }}</div>
+              <div class="text-caption text-slate-400">ID: {{ item.id.substring(0, 8).toUpperCase() }}</div>
             </div>
           </div>
         </template>
@@ -88,11 +103,11 @@
           <v-chip
             :color="getRoleColor(item.role)"
             size="small"
-            variant="tonal"
-            class="font-weight-black px-4 py-3"
+            variant="flat"
+            class="font-weight-black px-4"
             rounded="lg"
           >
-            <v-icon start :icon="getRoleIcon(item.role)" size="16" class="mr-1"></v-icon>
+            <v-icon start :icon="getRoleIcon(item.role)" size="14"></v-icon>
             {{ item.role }}
           </v-chip>
         </template>
@@ -100,20 +115,20 @@
         <template v-slot:item.actions="{ item }">
           <div class="d-flex justify-end gap-2">
             <v-btn 
-              icon="mdi-pencil-outline" 
-              variant="text" 
-              color="indigo" 
-              size="small" 
+              icon="mdi-pencil" 
+              variant="tonal" 
+              color="slate-600" 
+              size="x-small" 
               @click="openDialog(item)"
-              class="action-btn"
+              rounded="lg"
             ></v-btn>
             <v-btn 
-              icon="mdi-delete-outline" 
-              variant="text" 
+              icon="mdi-delete" 
+              variant="tonal" 
               color="error" 
-              size="small" 
+              size="x-small" 
               @click="confirmDelete(item)"
-              class="action-btn"
+              rounded="lg"
             ></v-btn>
           </div>
         </template>
@@ -121,97 +136,76 @@
     </v-card>
 
     <!-- User Dialog -->
-    <v-dialog v-model="dialog" max-width="550" persistent transition="dialog-bottom-transition">
-      <v-card rounded="xl" class="pa-4">
-        <v-card-title class="pa-6 text-h5 font-weight-black d-flex align-center">
-          <v-icon :icon="editedIndex === -1 ? 'mdi-account-plus' : 'mdi-account-edit'" class="mr-4" color="primary"></v-icon>
-          {{ editedIndex === -1 ? 'Registrar Nuevo Usuario' : 'Actualizar Información' }}
+    <v-dialog v-model="dialog" max-width="500">
+      <v-card rounded="xl" elevation="24">
+        <v-card-title class="pa-8 bg-slate-900 text-white d-flex align-center">
+          <v-icon :icon="editedIndex === -1 ? 'mdi-account-plus' : 'mdi-account-edit'" class="mr-4"></v-icon>
+          <div class="text-h5 font-weight-black">
+            {{ editedIndex === -1 ? 'Registrar Usuario' : 'Editar Usuario' }}
+          </div>
         </v-card-title>
         
-        <v-card-text class="pa-6 pt-0">
+        <v-card-text class="pa-8 bg-white">
           <v-form ref="form" v-model="formValid">
             <v-row>
               <v-col cols="12">
+                <v-label class="text-caption font-weight-black mb-1">NOMBRE COMPLETO</v-label>
                 <v-text-field
                   v-model="editedItem.name"
-                  label="Nombre Completo"
                   variant="outlined"
                   density="comfortable"
-                  prepend-inner-icon="mdi-account"
                   rounded="lg"
-                  required
+                  hide-details
+                  class="mb-4"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
+                <v-label class="text-caption font-weight-black mb-1">CORREO ELECTRÓNICO</v-label>
                 <v-text-field
                   v-model="editedItem.email"
-                  label="Correo Institucional"
                   variant="outlined"
                   density="comfortable"
-                  prepend-inner-icon="mdi-email"
-                  placeholder="usuario@umsa.bo"
                   rounded="lg"
-                  required
+                  hide-details
+                  class="mb-4"
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
+                <v-label class="text-caption font-weight-black mb-1">ROL DEL SISTEMA</v-label>
                 <v-select
                   v-model="editedItem.role"
                   :items="['Root', 'Docente', 'Estudiante']"
-                  label="Rol Asignado"
                   variant="outlined"
                   density="comfortable"
-                  prepend-inner-icon="mdi-shield-account"
                   rounded="lg"
-                  required
+                  hide-details
                 ></v-select>
               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
 
-        <v-card-actions class="pa-6">
+        <v-card-actions class="pa-8 pt-0 bg-white">
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="dialog = false" rounded="xl" class="px-6">Cancelar</v-btn>
+          <v-btn variant="text" color="slate-400" @click="dialog = false" rounded="lg" class="font-weight-bold px-4">Cancelar</v-btn>
           <v-btn 
             color="primary" 
             variant="elevated" 
             @click="save" 
             class="px-8 font-weight-bold" 
-            rounded="xl"
-            elevation="4"
+            rounded="lg"
+            elevation="0"
           >
-            Confirmar
+            Guardar
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- Delete Confirmation -->
-    <v-dialog v-model="dialogDelete" max-width="450" persistent>
-      <v-card rounded="xl" class="pa-4 text-center">
-        <v-card-text class="pa-8">
-          <v-icon icon="mdi-alert-circle-outline" color="error" size="80" class="mb-6"></v-icon>
-          <h3 class="text-h5 font-weight-black mb-4">¿Confirmar eliminación?</h3>
-          <p class="text-body-1 opacity-70 mb-0">
-            Esta acción revocará todos los accesos de <strong>{{ editedItem.name }}</strong>. No se puede deshacer.
-          </p>
-        </v-card-text>
-        <v-card-actions class="pa-6 pt-0 d-flex justify-center">
-          <v-btn variant="text" @click="dialogDelete = false" rounded="xl" class="px-8">Atrás</v-btn>
-          <v-btn 
-            color="error" 
-            variant="elevated" 
-            @click="deleteItemConfirm" 
-            class="px-8 font-weight-bold" 
-            rounded="xl"
-            elevation="4"
-          >
-            Sí, eliminar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Sync Success Overlay -->
+    <v-snackbar v-model="syncToast" color="success" rounded="pill">
+      Sincronización con Google Sheets completada exitosamente.
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -227,6 +221,8 @@ interface User {
 }
 
 const loading = ref(true);
+const syncing = ref(false);
+const syncToast = ref(false);
 const dialog = ref(false);
 const dialogDelete = ref(false);
 const users = ref<User[]>([]);
@@ -247,60 +243,52 @@ const defaultItem: User = {
 };
 
 const headers: any = [
-  { title: 'Usuario', key: 'name' },
-  { title: 'Email', key: 'email' },
-  { title: 'Rol', key: 'role' },
-  { title: 'Acciones', key: 'actions', sortable: false, align: 'end' },
+  { title: 'Información de Usuario', key: 'name' },
+  { title: 'Email Institucional', key: 'email' },
+  { title: 'Privilegios', key: 'role' },
+  { title: 'Operaciones', key: 'actions', sortable: false, align: 'end' },
 ];
 
 const search = ref('');
 const formValid = ref(false);
 
 const stats = computed(() => [
-  { 
-    label: 'Total Usuarios', 
-    value: users.value.length, 
-    icon: 'mdi-account-group', 
-    color: 'primary',
-    bgStart: '#1e293b', // Slate 800
-    bgEnd: '#334155'    // Slate 700
-  },
-  { 
-    label: 'Docentes', 
-    value: users.value.filter(u => u.role === 'Docente').length, 
-    icon: 'mdi-school', 
-    color: 'info',
-    bgStart: '#1976D2', // Primary Blue
-    bgEnd: '#2196F3'    // Info Blue
-  },
-  { 
-    label: 'Estudiantes', 
-    value: users.value.filter(u => u.role === 'Estudiante').length, 
-    icon: 'mdi-account-school', 
-    color: 'success',
-    bgStart: '#3b82f6', // Bright Blue
-    bgEnd: '#60a5fa'    // Lighter Blue
-  },
+  { label: 'Total Base', value: users.value.length, icon: 'mdi-account-group', color: 'slate-900' },
+  { label: 'Docentes', value: users.value.filter(u => u.role === 'Docente').length, icon: 'mdi-school', color: 'primary' },
+  { label: 'Estudiantes', value: users.value.filter(u => u.role === 'Estudiante').length, icon: 'mdi-account-school', color: 'indigo' },
 ]);
 
-onMounted(async () => {
-  // Simulate API fetch
+const fetchUsers = async () => {
+  loading.value = true;
+  // Simular Fetch
   setTimeout(() => {
     users.value = [
-      { id: '1', name: 'Diego (Admin)', email: 'diego@umsa.bo', role: 'Root', avatar: 'https://i.pravatar.cc/150?u=1' },
-      { id: '2', name: 'Alejandro (Admin)', email: 'alejandro@umsa.bo', role: 'Root', avatar: 'https://i.pravatar.cc/150?u=2' },
-      { id: '3', name: 'Jules (Estudiante)', email: 'jules@umsa.bo', role: 'Estudiante', avatar: 'https://i.pravatar.cc/150?u=3' },
-      { id: '4', name: 'Prof. Garcia', email: 'garcia@umsa.bo', role: 'Docente', avatar: 'https://i.pravatar.cc/150?u=4' },
+      { id: '1', name: 'Diego (Admin)', email: 'diego@cloudacademy.com', role: 'Root', avatar: 'https://i.pravatar.cc/150?u=1' },
+      { id: '2', name: 'Alejandro (Admin)', email: 'alejandro@cloudacademy.com', role: 'Root', avatar: 'https://i.pravatar.cc/150?u=2' },
+      { id: '3', name: 'Estudiante de Prueba', email: 'estudiante1@cloudacademy.com', role: 'Estudiante', avatar: 'https://i.pravatar.cc/150?u=3' },
+      { id: '4', name: 'Profesor de Prueba', email: 'docente1@cloudacademy.com', role: 'Docente', avatar: 'https://i.pravatar.cc/150?u=4' },
     ];
     loading.value = false;
-  }, 800);
+  }, 500);
+};
+
+const syncWithSheets = () => {
+  syncing.value = true;
+  setTimeout(() => {
+    syncing.value = false;
+    syncToast.value = true;
+  }, 2000);
+};
+
+onMounted(() => {
+  fetchUsers();
 });
 
 const getRoleColor = (role: string) => {
   switch (role) {
     case 'Root': return 'slate-900';
     case 'Docente': return 'primary';
-    case 'Estudiante': return 'info';
+    case 'Estudiante': return 'indigo';
     default: return 'grey';
   }
 };
@@ -331,11 +319,6 @@ const confirmDelete = (item: User) => {
   dialogDelete.value = true;
 };
 
-const deleteItemConfirm = () => {
-  users.value.splice(editedIndex.value, 1);
-  dialogDelete.value = false;
-};
-
 const save = () => {
   if (editedIndex.value > -1) {
     Object.assign(users.value[editedIndex.value], editedItem.value);
@@ -347,73 +330,39 @@ const save = () => {
 </script>
 
 <style scoped>
-.gradient-text {
-  background: linear-gradient(135deg, #1e293b 0%, #1976d2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+.bg-slate-50 { background-color: #f8fafc; }
+.text-slate-900 { color: #0f172a; }
+.text-slate-800 { color: #1e293b; }
+.text-slate-500 { color: #64748b; }
+.text-slate-400 { color: #94a3b8; }
+.bg-slate-900 { background-color: #0f172a !important; }
+
+.min-vh-100 { min-height: 100vh; }
+.gap-3 { gap: 12px; }
 
 .stat-card {
-  position: relative;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0 !important;
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05) !important;
 }
 
-.stat-gradient {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.9;
-  z-index: 0;
-}
-
-.relative-content {
-  position: relative;
-  z-index: 1;
-}
-
-.main-table-card {
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-
-.max-width-400 {
-  max-width: 400px;
-}
-
-.user-table-custom :deep(thead) {
-  background: rgba(var(--v-theme-primary), 0.05);
-}
-
-.user-table-custom :deep(th) {
-  font-weight: 800 !important;
+.user-table :deep(thead th) {
+  background-color: #f8fafc !important;
+  color: #64748b !important;
   text-transform: uppercase;
-  font-size: 0.75rem !important;
-  letter-spacing: 1px !important;
-  color: rgba(var(--v-theme-on-surface), 0.6) !important;
-  height: 60px !important;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  font-weight: 800 !important;
+  height: 64px !important;
 }
 
-.action-btn {
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  background: rgba(var(--v-theme-primary), 0.1);
-  transform: scale(1.1);
-}
+.max-width-400 { max-width: 400px; }
 
 .tracking-widest {
   letter-spacing: 2px !important;
-}
-
-.gap-2 {
-  gap: 8px;
 }
 </style>

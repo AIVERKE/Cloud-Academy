@@ -186,7 +186,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useDataStore, type Submission, type Assignment } from '../../store/data';
+import { useDataStore, type Assignment } from '../../store/data';
 import { useAuthStore } from '../../store/auth';
 import { getSyncStatusColor } from '../../types/enums';
 

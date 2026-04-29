@@ -114,11 +114,11 @@ const loadData = async () => {
   loading.value = true;
   try {
     const allAssignments = await dataStore.fetchAssignments();
-    assignment.value = allAssignments.find(a => a.id === tareaId) || null;
+    assignment.value = allAssignments.find((a: any) => a.id === tareaId) || null;
 
     // Check if student already submitted (Mock logic)
     const submissions = await dataStore.fetchSubmissions(tareaId);
-    if (submissions.find(s => s.estudianteNombre === authStore.user?.name)) {
+    if (submissions.find((s: any) => s.estudianteNombre === authStore.user?.name)) {
       alreadySubmitted.value = true;
     }
   } catch (error) {
@@ -134,8 +134,7 @@ const submitWork = async () => {
 
   submitting.value = true;
   try {
-    const studentName = authStore.user?.name || 'Estudiante Desconocido';
-    await dataStore.submitAssignment(tareaId, driveLink.value, studentName);
+    await dataStore.submitAssignment(tareaId, driveLink.value);
 
     showSnackbar('Tarea entregada exitosamente', 'success');
     alreadySubmitted.value = true;

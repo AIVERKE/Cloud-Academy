@@ -127,6 +127,64 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Premium Sync Dialog -->
+    <v-dialog v-model="syncDialog" max-width="450" transition="dialog-bottom-transition">
+      <v-card rounded="xl" elevation="24" class="overflow-hidden border-0">
+        <v-card-text class="pa-0">
+          <div class="bg-slate-900 pa-8 text-center relative overflow-hidden">
+            <div class="abs-deco-sync"></div>
+            <v-avatar color="white" size="80" class="elevation-12 mb-4 relative z-10">
+              <v-icon icon="mdi-check-decagram" color="primary" size="48"></v-icon>
+            </v-avatar>
+            <h2 class="text-h4 font-weight-black text-white mb-2 relative z-10">¡Sincronización Exitosa!</h2>
+            <p class="text-blue-lighten-4 opacity-70 relative z-10">El puente de datos con Google Drive se ha actualizado correctamente.</p>
+          </div>
+          
+          <div class="pa-8 bg-white">
+            <v-row>
+              <v-col cols="6">
+                <div class="pa-4 bg-slate-50 rounded-xl border text-center">
+                  <div class="text-h3 font-weight-black text-primary">{{ syncResult.creados }}</div>
+                  <div class="text-overline font-weight-bold text-slate-500">Nuevos</div>
+                </div>
+              </v-col>
+              <v-col cols="6">
+                <div class="pa-4 bg-slate-50 rounded-xl border text-center">
+                  <div class="text-h3 font-weight-black text-info">{{ syncResult.actualizados }}</div>
+                  <div class="text-overline font-weight-bold text-slate-500">Actualizados</div>
+                </div>
+              </v-col>
+            </v-row>
+            
+            <v-btn
+              block
+              color="slate-900"
+              size="x-large"
+              rounded="xl"
+              class="mt-8 text-none font-weight-bold elevation-4"
+              @click="syncDialog = false"
+            >
+              Entendido
+            </v-btn>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Error Dialog -->
+    <v-dialog v-model="errorDialog" max-width="400">
+      <v-card rounded="xl" class="pa-6">
+        <div class="text-center">
+          <v-avatar color="error-lighten-5" size="72" class="mb-4">
+            <v-icon icon="mdi-cloud-off-outline" color="error" size="36"></v-icon>
+          </v-avatar>
+          <h3 class="text-h5 font-weight-black text-slate-900 mb-2">Error de Conexión</h3>
+          <p class="text-slate-600 mb-6">No pudimos establecer comunicación con la API de Google Drive. Por favor, intenta de nuevo más tarde.</p>
+          <v-btn block color="error" variant="tonal" rounded="xl" @click="errorDialog = false" class="font-weight-bold">Cerrar</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -176,13 +234,17 @@ onMounted(async () => {
 });
 
 const isSyncing = ref(false);
+const syncDialog = ref(false);
+const errorDialog = ref(false);
+const syncResult = ref({ creados: 0, actualizados: 0 });
 
 const handleSync = async () => {
   isSyncing.value = true;
   try {
     const result = await dataStore.syncDriveResources();
     if (result.creados !== undefined) {
-      alert(`Sincronización completa: ${result.creados} creados, ${result.actualizados} actualizados.`);
+      syncResult.value = result;
+      syncDialog.value = true;
       // Refresh stats
       const stats = await dataStore.fetchDashboardStats();
       dashboardStats.value = {
@@ -194,7 +256,7 @@ const handleSync = async () => {
       activities.value = stats.activities || [];
     }
   } catch (error) {
-    alert('Error al sincronizar con Google Drive');
+    errorDialog.value = true;
   } finally {
     isSyncing.value = false;
   }
@@ -305,5 +367,16 @@ const quickActions = computed(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.abs-deco-sync {
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 100%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0) 70%);
+  transform: rotate(15deg);
+  pointer-events: none;
 }
 </style>
