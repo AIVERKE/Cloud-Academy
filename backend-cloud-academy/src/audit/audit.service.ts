@@ -36,7 +36,7 @@ export class AuditService {
     return sanitized;
   }
 
-  async createLog(usuario_id: string, accion: string, detalle: any): Promise<void> {
+  async createLog(usuario_id: string | null, accion: string, detalle: any): Promise<void> {
     try {
       const sanitizedDetalle = this.sanitizeBody(detalle);
 

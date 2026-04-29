@@ -35,7 +35,7 @@ export class AuditInterceptor implements NestInterceptor {
   }
 
   private logAction(context: ExecutionContext, request: any) {
-    const userId = request.user?.id || '00000000-0000-0000-0000-000000000000'; // Mock UUID fallback
+    const userId = request.user?.id || null;
 
     // Check for custom @AuditLog decorator
     const customAction = this.reflector.get<string>('audit_log', context.getHandler());

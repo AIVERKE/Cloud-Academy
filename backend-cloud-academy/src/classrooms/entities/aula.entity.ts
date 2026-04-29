@@ -12,6 +12,9 @@ export class Aula {
   @Column({ unique: true })
   codigo_acceso: string;
 
+  @Column({ type: 'text', nullable: true })
+  descripcion: string;
+
   @Column()
   docente_id: string;
 

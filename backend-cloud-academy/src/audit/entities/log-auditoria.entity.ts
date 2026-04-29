@@ -6,12 +6,12 @@ export class LogAuditoria {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  usuario_id: string;
+  @Column({ nullable: true })
+  usuario_id: string | null;
 
-  @ManyToOne(() => User, (user) => user.logs)
+  @ManyToOne(() => User, (user) => user.logs, { nullable: true })
   @JoinColumn({ name: 'usuario_id' })
-  usuario: User;
+  usuario: User | null;
 
   @Column()
   accion: string;

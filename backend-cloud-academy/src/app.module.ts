@@ -11,6 +11,7 @@ import { GoogleModule } from './google/google.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { ResourcesModule } from './resources/resources.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ResourcesModule } from './resources/resources.module';
     AuditModule,
     GoogleModule,
     ResourcesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
