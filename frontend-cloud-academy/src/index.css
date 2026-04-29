@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  --color-on-primary-fixed: #131b2e;
+  --color-error-container: #ffdad6;
+  --color-surface-tint: #565e74;
+  --color-tertiary: #000000;
+  --color-outline: #76777d;
+  --color-secondary-container: #39b8fd;
+  --color-primary: #000000;
+  --color-surface: #f7f9fb;
+  --color-outline-variant: #c6c6cd;
+  --color-inverse-primary: #bec6e0;
+  --color-on-tertiary-container: #009485;
+  --color-on-tertiary-fixed-variant: #005048;
+  --color-surface-container-highest: #e0e3e5;
+  --color-tertiary-fixed: #71f8e4;
+  --color-on-secondary-fixed-variant: #004c6e;
+  --color-background: #f7f9fb;
+  --color-on-background: #191c1e;
+  --color-inverse-surface: #2d3133;
+  --color-on-primary-container: #7c839b;
+  --color-on-error: #ffffff;
+  --color-on-secondary: #ffffff;
+  --color-secondary-fixed-dim: #89ceff;
+  --color-on-surface-variant: #45464d;
+  --color-on-primary-fixed-variant: #3f465c;
+  --color-secondary: #006591;
+  --color-primary-fixed: #dae2fd;
+  --color-surface-container-lowest: #ffffff;
+  --color-tertiary-fixed-dim: #4fdbc8;
+  --color-surface-container: #eceef0;
+  --color-tertiary-container: #00201c;
+  --color-on-tertiary-fixed: #00201c;
+  --color-primary-container: #131b2e;
+  --color-on-primary: #ffffff;
+  --color-surface-container-high: #e6e8ea;
+  --color-on-surface: #191c1e;
+  --color-surface-bright: #f7f9fb;
+  --color-secondary-fixed: #c9e6ff;
+  --color-surface-variant: #e0e3e5;
+  --color-on-error-container: #93000a;
+  --color-on-tertiary: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-dim: #d8dadc;
+  --color-primary-fixed-dim: #bec6e0;
+  --color-on-secondary-fixed: #001e2f;
+  --color-on-secondary-container: #004666;
+  --color-inverse-on-surface: #eff1f3;
+  --color-error: #ba1a1a;
+
+  --radius-default: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+
+  --spacing-xs: 4px;
+  --spacing-md: 16px;
+  --spacing-sm: 8px;
+  --spacing-container-max: 1280px;
+  --spacing-xl: 48px;
+  --spacing-unit: 4px;
+  --spacing-lg: 24px;
+  --spacing-gutter: 24px;
+
+  --font-label-caps: "Space Grotesk";
+  --font-h1: "Inter";
+  --font-body-sm: "Inter";
+  --font-body-md: "Inter";
+  --font-h3: "Inter";
+  --font-mono-data: "Space Grotesk";
+  --font-body-lg: "Inter";
+  --font-h2: "Inter";
+
+  /* Text Styles mapping to the font sizes if needed, but Tailwind 4 handles font-size variables differently. 
+     We can use --font-size-* but Tailwind usually expects specific formats. 
+     I'll just use the font families for now as the user classes use font-h1, etc. */
+}
+
+/* Custom classes for font sizes since Tailwind 4 variables are more strict */
+.text-h1 { font-size: 48px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 700; }
+.text-h2 { font-size: 36px; line-height: 1.25; letter-spacing: -0.01em; font-weight: 600; }
+.text-h3 { font-size: 24px; line-height: 1.3; font-weight: 600; }
+.text-body-lg { font-size: 18px; line-height: 1.6; font-weight: 400; }
+.text-body-md { font-size: 16px; line-height: 1.6; font-weight: 400; }
+.text-body-sm { font-size: 14px; line-height: 1.5; font-weight: 400; }
+.text-label-caps { font-size: 12px; line-height: 1.0; letter-spacing: 0.05em; font-weight: 600; }
+.text-mono-data { font-size: 14px; line-height: 1.4; font-weight: 500; }
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.material-symbols-outlined[data-weight="fill"] {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 4s ease-in-out infinite;
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: skewX(-25deg);
+  animation: shine 3s infinite;
+}
+
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.card-hover:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}

@@ -9,18 +9,18 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
+    name: 'Landing',
+    component: () => import('../views/Landing.vue'),
+  },
+  {
+    path: '/dashboard',
     component: () => import('../layouts/MainLayout.vue'),
     meta: { requiresAuth: true },
     children: [
       {
         path: '',
         name: 'Home',
-        redirect: _to => {
-          const authStore = useAuthStore();
-          if (authStore.user?.role === 'Docente') return { name: 'TeacherDashboard' };
-          if (authStore.user?.role === 'Root') return { name: 'AuditLogs' };
-          return { name: 'StudentDashboard' };
-        }
+        component: () => import('../views/DashboardHome.vue'),
       },
       // Docente Routes
       {
