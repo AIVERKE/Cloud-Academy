@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, OneToMany, ManyToMany, JoinTable, BeforeInsert, BeforeUpdate } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Role } from './role.entity';
 import { Aula } from '../../classrooms/entities/aula.entity';
 import { Entrega } from '../../submissions/entities/entrega.entity';
@@ -20,6 +21,9 @@ export class User {
 
   @Column()
   rol_id: string;
+
+  @Column({ nullable: true })
+  password?: string;
 
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'rol_id' })
@@ -44,4 +48,12 @@ export class User {
 
   @OneToMany(() => LogAuditoria, (log) => log.usuario)
   logs: LogAuditoria[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
 }
