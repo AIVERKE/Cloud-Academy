@@ -138,7 +138,7 @@ export class SubmissionsService {
       throw new NotFoundException('Estudiante no encontrado');
     }
 
-    const results = [];
+    const results: any[] = [];
 
     for (const aula of student.aulas_inscritas) {
       const tareas = await this.tareaRepository.find({
