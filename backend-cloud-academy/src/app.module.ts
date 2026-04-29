@@ -10,6 +10,7 @@ import { AuditModule } from './audit/audit.module';
 import { GoogleModule } from './google/google.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuditInterceptor } from './audit/audit.interceptor';
+import { ResourcesModule } from './resources/resources.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { AuditInterceptor } from './audit/audit.interceptor';
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'cloud_academy',
       autoLoadEntities: true,
-      synchronize: true, // Be careful in production!
+      synchronize: false, // Usamos migraciones para mayor seguridad
+
     }),
     AuthModule,
     ClassroomsModule,
@@ -29,6 +31,7 @@ import { AuditInterceptor } from './audit/audit.interceptor';
     SubmissionsModule,
     AuditModule,
     GoogleModule,
+    ResourcesModule,
   ],
   controllers: [AppController],
   providers: [
