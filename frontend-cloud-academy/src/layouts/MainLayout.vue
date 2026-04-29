@@ -90,21 +90,21 @@ const drawer = ref(true);
 
 const menuItems = computed(() => {
   const role = authStore.user?.role;
+  const items = [
+    { title: 'Inicio', icon: 'mdi-home', to: { name: 'Home' } },
+    { title: 'Recursos', icon: 'mdi-folder-google', to: { name: 'Resources' } }
+  ];
+
   if (role === 'Docente') {
-    return [
-      { title: 'Mis Aulas', icon: 'mdi-google-classroom', to: { name: 'TeacherDashboard' } }
-    ];
+    items.splice(1, 0, { title: 'Mis Aulas', icon: 'mdi-google-classroom', to: { name: 'TeacherDashboard' } });
   } else if (role === 'Estudiante') {
-    return [
-      { title: 'Mis Aulas', icon: 'mdi-google-classroom', to: { name: 'StudentDashboard' } },
-      { title: 'Pendientes', icon: 'mdi-format-list-checks', to: { name: 'AssignmentList' } }
-    ];
+    items.splice(1, 0, { title: 'Mis Aulas', icon: 'mdi-google-classroom', to: { name: 'StudentDashboard' } });
+    items.splice(2, 0, { title: 'Mis Tareas', icon: 'mdi-format-list-checks', to: { name: 'AssignmentList' } });
   } else if (role === 'Root') {
-    return [
-      { title: 'Auditoría', icon: 'mdi-shield-check', to: { name: 'AuditLogs' } }
-    ];
+    items.push({ title: 'Auditoría', icon: 'mdi-shield-check', to: { name: 'AuditLogs' } });
   }
-  return [];
+  
+  return items;
 });
 
 const handleToggleRole = (role: Role) => {
