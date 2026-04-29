@@ -326,7 +326,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useDataStore, type Classroom, type Assignment } from '../../store/data';
+import { useDataStore } from '../../store/data';
 import { useAuthStore } from '../../store/auth';
 
 const route = useRoute();

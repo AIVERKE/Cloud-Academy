@@ -1,12 +1,17 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { SyncStatus, EstadoEntrega } from '../types/enums';
+import { useAuthStore } from './auth';
 
 export interface Classroom {
   id: string;
   name: string;
   codigo_acceso: string;
   description?: string;
+  docente?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface Assignment {
@@ -37,6 +42,7 @@ export interface AuditLog {
 }
 
 export const useDataStore = defineStore('data', () => {
+  const authStore = useAuthStore();
   // Mock Data
   const classrooms = ref<Classroom[]>([
     { id: '1', name: 'Ingeniería de Software', codigo_acceso: 'SOFT123', description: 'Aula de Ingeniería de Software' },
@@ -103,11 +109,27 @@ export const useDataStore = defineStore('data', () => {
     }
   };
 
-  const fetchAssignments = async (aulaId: string) => {
+  const fetchAssignments = async (aulaId?: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/aulas/${aulaId}/tareas`);
+      // Safeguard against literal "undefined" string from route params
+      const effectiveAulaId = (aulaId === 'undefined' || !aulaId) ? undefined : aulaId;
+
+      const url = effectiveAulaId 
+        ? `http://localhost:3000/aulas/${effectiveAulaId}/tareas`
+        : `http://localhost:3000/aulas/tareas/estudiante`;
+      
+      const response = await fetch(url, {
+        headers: { 'user-id': authStore.user?.id || '' }
+      });
       if (!response.ok) throw new Error('Error fetching assignments');
-      return await response.json();
+      const data = await response.json();
+      
+      // Map backend snake_case to frontend camelCase
+      return data.map((a: any) => ({
+        ...a,
+        aulaId: a.aula_id,
+        // We can also ensure other fields match if needed
+      }));
     } catch (error) {
       console.error('Fetch Assignments Error:', error);
       return [];
@@ -173,22 +195,76 @@ export const useDataStore = defineStore('data', () => {
     }
   };
 
-  const submitAssignment = async (tareaId: string, url: string, studentName: string) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      submissions.value.push({
-          id: Math.random().toString(36).substr(2, 9),
-          tareaId,
-          estudianteNombre: studentName,
-          google_drive_url: url,
-          fecha_entrega: new Date().toISOString(),
-          sync_status: SyncStatus.Pendiente_Actualizacion,
-          calificacion: null
+  const submitAssignment = async (tareaId: string, url: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/entregas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tarea_id: tareaId,
+          estudiante_id: authStore.user?.id || '',
+          google_drive_url: url
+        })
       });
+      if (!response.ok) throw new Error('Error al enviar tarea');
+      return await response.json();
+    } catch (error) {
+      console.error('Submit Assignment Error:', error);
+      throw error;
+    }
   };
 
-  const fetchAuditLogs = async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return auditLogs.value;
+  const fetchAuditLogs = async (userId: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/auditoria', {
+        headers: { 'user-id': userId }
+      });
+      if (!response.ok) throw new Error('Error al obtener logs de auditoría');
+      const data = await response.json();
+      return data.map((log: any) => ({
+        id: log.id,
+        fechaHora: log.fecha_hora,
+        usuarioId: log.usuario_id,
+        accion: log.accion,
+        detalle: log.detalle
+      }));
+    } catch (error) {
+      console.error('Fetch Audit Logs Error:', error);
+      return [];
+    }
+  };
+
+  const fetchAvailableClassrooms = async (userId: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/aulas/disponibles', {
+        headers: { 'user-id': userId }
+      });
+      if (!response.ok) throw new Error('Error al obtener aulas disponibles');
+      const data = await response.json();
+      return data.map((a: any) => ({
+        id: a.id,
+        name: a.nombre,
+        codigo_acceso: a.codigo_acceso,
+        description: a.descripcion || ''
+      }));
+    } catch (error) {
+      console.error('Fetch Available Classrooms Error:', error);
+      return [];
+    }
+  };
+
+  const enrollInClassroom = async (aulaId: string, userId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/aulas/${aulaId}/inscribirse`, {
+        method: 'POST',
+        headers: { 'user-id': userId }
+      });
+      if (!response.ok) throw new Error('Error al inscribirse en el aula');
+      return await response.json();
+    } catch (error) {
+      console.error('Enroll Error:', error);
+      throw error;
+    }
   };
 
   const syncDriveResources = async () => {
@@ -204,7 +280,7 @@ export const useDataStore = defineStore('data', () => {
     }
   };
 
-  const fetchSheetData = async (sheetId: string) => {
+  const fetchSheetData = async (_sheetId: string) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     // Mock data based on the sheetId
     return [
@@ -252,6 +328,7 @@ export const useDataStore = defineStore('data', () => {
     fetchClassrooms, createClassroom,
     fetchAssignments, createAssignment,
     fetchSubmissions, updateSubmissionGrade, submitAssignment,
-    fetchAuditLogs, syncDriveResources, fetchSheetData, fetchDashboardStats, fetchTeacherStats
+    fetchAuditLogs, syncDriveResources, fetchSheetData, fetchDashboardStats, fetchTeacherStats,
+    fetchAvailableClassrooms, enrollInClassroom, fetchStudents
   };
 });

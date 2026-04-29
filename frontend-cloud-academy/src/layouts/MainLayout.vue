@@ -61,42 +61,6 @@
       <!-- Bottom Actions -->
       <template v-slot:append>
         <div class="pa-6 bottom-actions-dark">
-          <!-- Role Switcher -->
-          <v-menu location="top" offset="12">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                v-bind="props"
-                block
-                variant="outlined"
-                rounded="lg"
-                class="mb-3 text-none role-toggle-btn-dark"
-                color="blue-lighten-3"
-                prepend-icon="mdi-account-convert"
-              >
-                Cambiar Perfil
-              </v-btn>
-            </template>
-            <v-list rounded="xl" class="pa-2 elevation-24 bg-slate-900 border-slate-700">
-              <v-list-subheader class="text-uppercase font-weight-black text-caption px-4 py-2 text-primary">
-                Selector de Roles
-              </v-list-subheader>
-              <v-list-item 
-                v-for="role in (['Docente', 'Estudiante', 'Root'] as Role[])" 
-                :key="role" 
-                @click="handleToggleRole(role)" 
-                :active="authStore.user?.role === role"
-                rounded="lg"
-                class="mb-1 text-white"
-                active-color="primary"
-              >
-                <template v-slot:prepend>
-                  <v-icon :icon="role === 'Root' ? 'mdi-shield-crown' : role === 'Docente' ? 'mdi-school' : 'mdi-account'"></v-icon>
-                </template>
-                <v-list-item-title class="font-weight-bold text-body-2">{{ role }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-
           <!-- Logout Button -->
           <v-btn
             block
@@ -129,7 +93,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useAuthStore, type Role } from '../store/auth';
+import { useAuthStore } from '../store/auth';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
@@ -156,11 +120,6 @@ const menuItems = computed(() => {
   
   return items;
 });
-
-const handleToggleRole = (role: Role) => {
-  authStore.toggleRole(role);
-  router.push('/dashboard');
-};
 
 const handleLogout = () => {
   authStore.logout();
@@ -236,10 +195,6 @@ const handleLogout = () => {
 /* Bottom Actions Dark */
 .bottom-actions-dark {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-.role-toggle-btn-dark {
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  font-size: 0.85rem;
 }
 .logout-btn-dark {
   box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3) !important;

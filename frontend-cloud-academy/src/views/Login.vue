@@ -55,13 +55,13 @@
             <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">school</span>
           </div>
           <h1 class="text-h2 font-h2 text-on-surface mb-xs">Acceder</h1>
-          <p class="text-body-md text-on-surface-variant">Ingresa tus credenciales institucionales</p>
+          <p class="text-body-md text-on-surface-variant">Ingresa tus credenciales para acceder</p>
         </div>
 
         <form class="space-y-lg" @submit.prevent="submit">
           <div class="space-y-md">
             <div class="entrance-item">
-              <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="email">E-mail Institucional</label>
+              <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="email">E-mail</label>
               <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary">
                   <span class="material-symbols-outlined text-lg">mail</span>
@@ -71,7 +71,7 @@
                   class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
                   id="email" 
                   name="email" 
-                  placeholder="usuario@umsa.bo" 
+                  placeholder="usuario@ejemplo.com" 
                   required 
                   type="email"
                 />
@@ -175,11 +175,6 @@ onMounted(() => {
 const submit = async () => {
   if (!email.value) {
     error.value = 'El correo es requerido';
-    return;
-  }
-
-  if (!/.+@umsa\.bo$/.test(email.value)) {
-    error.value = 'Se requiere correo institucional (@umsa.bo)';
     return;
   }
 
