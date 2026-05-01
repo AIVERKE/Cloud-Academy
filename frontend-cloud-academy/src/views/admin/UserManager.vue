@@ -227,7 +227,6 @@ const loading = ref(true);
 const syncing = ref(false);
 const syncToast = ref(false);
 const dialog = ref(false);
-const dialogDelete = ref(false);
 const users = ref<User[]>([]);
 const editedIndex = ref(-1);
 

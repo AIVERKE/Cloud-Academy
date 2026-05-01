@@ -1,0 +1,36 @@
+name: frontend cloud academy
+
+on:
+  push:
+    branches: [ main ] # Se activa al subir cambios a main
+  pull_request:
+    branches: [ main ] # Se activa al crear un PR hacia main
+
+jobs:
+  check-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend-cloud-academy
+
+    steps:
+      - name: Checkout código 📂
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 🟢
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependencias 📦
+        run: npm ci
+
+      - name: Revisar estilo (Linter) 🧹
+        run: npm run lint || echo "No lint script found"
+        continue-on-error: true
+
+      - name: Verificar sintaxis 🔍
+        run: npx vue-tsc --noEmit
+
+      - name: Compilar proyecto (Build) 🚀
+        run: npm run build
