@@ -22,6 +22,14 @@ Cloud-Academy/
 
 Seguí estos pasos en orden para tener el entorno de desarrollo funcionando.
 
+### 0. Obtener el Código 📥
+
+Primero, cloná el repositorio en tu computadora:
+```bash
+git clone https://github.com/AIVERKE/Cloud-Academy.git
+cd Cloud-Academy
+```
+
 ### 1. Requisitos Previos
 
 Antes de empezar, asegurate de tener instalado:
