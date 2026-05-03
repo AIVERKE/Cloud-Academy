@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Get, Delete, Param, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuditLog } from '../audit/decorators/audit-log.decorator';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -8,14 +9,17 @@ export class AuthController {
 
   @AuditLog('LOGIN')
   @Post('login')
-  async login(@Body() credentials: { email: string }) {
-    const user = await this.authService.findByEmail(credentials.email);
+  async login(@Body() credentials: { email: string; password?: string }) {
+    const user = credentials.password 
+      ? await this.authService.validateUser(credentials.email, credentials.password)
+      : await this.authService.findByEmail(credentials.email);
+
     if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
     return { 
       success: true, 
-      message: 'Login tracked',
+      message: 'Login exitoso',
       user: {
         id: user.id,
         email: user.email,
@@ -23,6 +27,12 @@ export class AuthController {
         role: user.role?.nombre || 'Estudiante'
       }
     };
+  }
+  
+  @AuditLog('REGISTER')
+  @Post('register')
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
   @Post('register-test')

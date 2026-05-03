@@ -1,9 +1,12 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { GoogleService } from '../google/google.service';
 import { Role, RolNombre } from './entities/role.entity';
+import { RegisterDto } from './dto/register.dto';
+import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -42,7 +45,25 @@ export class AuthService implements OnModuleInit {
     this.logger.log('Seeding completado con éxito.');
   }
 
-  async registerUserWithRole(google_id: string, nombre_completo: string, email: string, rolNombre: RolNombre) {
+  async register(registerDto: RegisterDto) {
+    // REGLA DE NEGOCIO: El registro público es EXCLUSIVO para Estudiantes.
+    // Docentes y Administradores deben ser creados por un Root.
+    const existing = await this.findByEmail(registerDto.email);
+    if (existing) {
+      throw new ConflictException('El correo electrónico ya está registrado');
+    }
+
+    // Por defecto registramos como Estudiante
+    return this.registerUserWithRole(
+      undefined as any, // No google_id
+      registerDto.nombre_completo,
+      registerDto.email,
+      RolNombre.Estudiante,
+      registerDto.password
+    );
+  }
+
+  async registerUserWithRole(google_id: string, nombre_completo: string, email: string, rolNombre: RolNombre, password?: string) {
     let role = await this.roleRepository.findOne({ where: { nombre: rolNombre } });
     if (!role) {
       role = await this.roleRepository.save({ nombre: rolNombre });
@@ -53,6 +74,7 @@ export class AuthService implements OnModuleInit {
       nombre_completo,
       email,
       rol_id: role.id,
+      password, // El hash se hace en BeforeInsert
     });
     
     const savedUser = await this.userRepository.save(newUser);
@@ -60,7 +82,9 @@ export class AuthService implements OnModuleInit {
     // Sincronización automática con Sheets
     await this.syncUserToSheets(savedUser, rolNombre);
     
-    return savedUser;
+    // Quitamos la contraseña del retorno por seguridad
+    const { password: _, ...result } = savedUser;
+    return result;
   }
 
   /**
@@ -91,6 +115,28 @@ export class AuthService implements OnModuleInit {
 
   async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email }, relations: ['role'] });
+  }
+
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.userRepository.findOne({ 
+      where: { email }, 
+      relations: ['role'],
+      select: ['id', 'email', 'nombre_completo', 'password', 'rol_id'] // Necesitamos traer el password para comparar
+    });
+
+    if (user && user.password) {
+      const isMatch = await bcrypt.compare(pass, user.password);
+      if (isMatch) {
+        const { password, ...result } = user;
+        return result;
+      }
+    }
+    
+    // Si no tiene password (usuario Google antiguo o login solo por email)
+    // Para no romper la compatibilidad actual si no mandan pass, 
+    // pero idealmente deberíamos forzar pass o google_id.
+    // Dejamos que el controlador decida.
+    return null;
   }
 
   async findAll() {

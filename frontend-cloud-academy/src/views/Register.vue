@@ -14,9 +14,9 @@
       </div>
 
       <div class="relative z-10 space-y-md">
-        <h2 class="text-h1 text-white leading-tight font-h1">Integración inteligente,<br/>gestión simplificada.</h2>
+        <h2 class="text-h1 text-white leading-tight font-h1">Unite a la<br/>comunidad educativa.</h2>
         <p class="text-body-lg text-on-primary-container/80 max-w-lg">
-          La primera plataforma académica diseñada para la interoperabilidad total entre sistemas legados y servicios cloud modernos.
+          Crea tu cuenta hoy y accede a la plataforma de gestión académica más avanzada del mercado.
         </p>
       </div>
 
@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <!-- Right Side: Login Form -->
+    <!-- Right Side: Register Form -->
     <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-md sm:p-xl bg-background relative">
       <!-- Mobile Top Bar -->
       <div class="lg:hidden absolute top-0 left-0 right-0 p-md flex items-center justify-between bg-white/80 backdrop-blur-md border-b border-outline-variant z-20">
@@ -51,15 +51,31 @@
 
       <div class="w-full max-w-[420px] login-card">
         <div class="mb-xl entrance-item">
-          <div class="w-12 h-12 bg-primary-fixed flex items-center justify-center rounded-xl mb-md">
-            <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">school</span>
+          <div class="w-12 h-12 bg-secondary-fixed flex items-center justify-center rounded-xl mb-md">
+            <span class="material-symbols-outlined text-secondary text-2xl" style="font-variation-settings: 'FILL' 1;">person_add</span>
           </div>
-          <h1 class="text-h2 font-h2 text-on-surface mb-xs">Acceder</h1>
-          <p class="text-body-md text-on-surface-variant">Ingresa tus credenciales para acceder</p>
+          <h1 class="text-h2 font-h2 text-on-surface mb-xs">Registro de Estudiantes</h1>
+          <p class="text-body-md text-on-surface-variant">Unite a nuestra comunidad educativa hoy mismo</p>
         </div>
 
-        <form class="space-y-lg" @submit.prevent="submit">
-          <div class="space-y-md">
+        <form class="space-y-md" @submit.prevent="submit">
+          <div class="space-y-sm">
+            <div class="entrance-item">
+              <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="name">Nombre Completo</label>
+              <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary">
+                  <span class="material-symbols-outlined text-lg">person</span>
+                </div>
+                <input 
+                  v-model="form.nombre_completo"
+                  class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
+                  id="name" 
+                  placeholder="Juan Pérez" 
+                  required 
+                />
+              </div>
+            </div>
+
             <div class="entrance-item">
               <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="email">E-mail</label>
               <div class="relative group">
@@ -67,10 +83,9 @@
                   <span class="material-symbols-outlined text-lg">mail</span>
                 </div>
                 <input 
-                  v-model="email"
+                  v-model="form.email"
                   class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
                   id="email" 
-                  name="email" 
                   placeholder="usuario@ejemplo.com" 
                   required 
                   type="email"
@@ -78,21 +93,39 @@
               </div>
             </div>
             
-            <div class="entrance-item">
-              <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="password">Contraseña</label>
-              <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary">
-                  <span class="material-symbols-outlined text-lg">lock</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+              <div class="entrance-item">
+                <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="password">Contraseña</label>
+                <div class="relative group">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary">
+                    <span class="material-symbols-outlined text-lg">lock</span>
+                  </div>
+                  <input 
+                    v-model="form.password"
+                    class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
+                    id="password" 
+                    placeholder="••••••••" 
+                    required 
+                    type="password"
+                  />
                 </div>
-                <input 
-                  v-model="password"
-                  class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
-                  id="password" 
-                  name="password" 
-                  placeholder="••••••••" 
-                  required 
-                  type="password"
-                />
+              </div>
+
+              <div class="entrance-item">
+                <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="confirm-password">Confirmar</label>
+                <div class="relative group">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary">
+                    <span class="material-symbols-outlined text-lg">verified_user</span>
+                  </div>
+                  <input 
+                    v-model="confirmPassword"
+                    class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
+                    id="confirm-password" 
+                    placeholder="••••••••" 
+                    required 
+                    type="password"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -101,49 +134,38 @@
             v-if="error"
             type="error"
             variant="tonal"
-            class="rounded-xl entrance-item"
+            class="rounded-xl entrance-item mt-md"
           >
             {{ error }}
           </v-alert>
 
-          <div class="flex items-center justify-between entrance-item">
-            <label class="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" class="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary/20 cursor-pointer"/>
-              <span class="text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Recordarme</span>
-            </label>
-            <a href="#" class="text-body-sm font-medium text-secondary hover:text-secondary-container transition-colors">¿Olvidaste tu clave?</a>
-          </div>
+          <v-alert
+            v-if="success"
+            type="success"
+            variant="tonal"
+            class="rounded-xl entrance-item mt-md"
+          >
+            {{ success }}
+          </v-alert>
 
-          <div class="entrance-item pt-sm">
+          <div class="entrance-item pt-md">
             <button 
               :disabled="loading"
-              class="w-full flex justify-center items-center gap-2 py-4 px-6 bg-primary-container text-white rounded-xl font-mono-data text-mono-data hover:bg-slate-900 focus:ring-4 focus:ring-primary/10 transition-all shadow-lg hover:shadow-primary/20 disabled:opacity-50" 
+              class="w-full flex justify-center items-center gap-2 py-4 px-6 bg-primary text-white rounded-xl font-mono-data text-mono-data hover:bg-primary/90 focus:ring-4 focus:ring-primary/10 transition-all shadow-lg hover:shadow-primary/20 disabled:opacity-50" 
               type="submit"
             >
               <span v-if="loading" class="animate-spin h-5 w-5 border-2 border-white/20 border-t-white rounded-full"></span>
-              {{ loading ? 'Autenticando...' : 'Iniciar Sesión' }}
-              <span v-if="!loading" class="material-symbols-outlined text-lg">login</span>
+              {{ loading ? 'Registrando...' : 'Crear Cuenta' }}
+              <span v-if="!loading" class="material-symbols-outlined text-lg">arrow_forward</span>
             </button>
           </div>
         </form>
 
         <div class="mt-xl text-center entrance-item">
           <p class="text-body-sm text-on-surface-variant">
-            ¿No tienes una cuenta? 
-            <router-link to="/register" class="font-bold text-secondary hover:underline transition-all">Regístrate aquí</router-link>
+            ¿Ya tienes una cuenta? 
+            <router-link to="/login" class="font-bold text-secondary hover:underline transition-all">Inicia Sesión</router-link>
           </p>
-        </div>
-
-        <div class="mt-xl pt-lg border-t border-surface-variant entrance-item">
-          <div class="p-4 bg-secondary-container/10 border border-secondary-container/20 rounded-xl">
-            <div class="flex items-center gap-2 mb-2 text-secondary">
-              <span class="material-symbols-outlined text-lg">info</span>
-              <span class="font-bold text-xs uppercase tracking-wider">Modo de Prueba</span>
-            </div>
-            <p class="text-[11px] leading-relaxed text-on-secondary-container/80">
-              Usa <strong>docente@umsa.bo</strong> o <strong>admin@umsa.bo</strong> para explorar los diferentes roles del sistema.
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -151,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth';
 import { createTimeline, stagger } from 'animejs';
@@ -159,10 +181,16 @@ import { createTimeline, stagger } from 'animejs';
 const router = useRouter();
 const authStore = useAuthStore();
 
-const email = ref('');
-const password = ref('password123');
+const form = reactive({
+  nombre_completo: '',
+  email: '',
+  password: ''
+});
+
+const confirmPassword = ref('');
 const loading = ref(false);
 const error = ref('');
+const success = ref('');
 
 onMounted(() => {
   const tl = createTimeline({
@@ -180,19 +208,28 @@ onMounted(() => {
 });
 
 const submit = async () => {
-  if (!email.value) {
-    error.value = 'El correo es requerido';
+  if (form.password !== confirmPassword.value) {
+    error.value = 'Las contraseñas no coinciden';
+    return;
+  }
+
+  if (form.password.length < 8) {
+    error.value = 'La contraseña debe tener al menos 8 caracteres';
     return;
   }
 
   loading.value = true;
   error.value = '';
+  success.value = '';
 
   try {
-    await authStore.login(email.value, password.value);
-    router.push('/dashboard');
-  } catch (err) {
-    error.value = 'Credenciales inválidas o error de conexión.';
+    await authStore.register({ ...form });
+    success.value = 'Registro exitoso. Redirigiendo al login...';
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+  } catch (err: any) {
+    error.value = err.message || 'Error al registrar usuario.';
   } finally {
     loading.value = false;
   }
@@ -202,9 +239,18 @@ const submit = async () => {
 <style scoped>
 @reference "tailwindcss";
 
-/* Specific overrides for professional feel */
 input::placeholder {
   color: var(--color-outline);
   opacity: 0.5;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(-50%) translateX(0px); }
+  50% { transform: translateY(-55%) translateX(10px); }
+  100% { transform: translateY(-50%) translateX(0px); }
 }
 </style>

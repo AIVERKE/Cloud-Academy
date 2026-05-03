@@ -11,8 +11,8 @@
         </div>
       </div>
       <div class="flex items-center gap-4">
-        <v-btn variant="text" color="slate-600" to="/login" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-200">Login</v-btn>
-        <v-btn color="primary-container" to="/login" class="bg-primary-container text-on-primary-container px-4 py-2 rounded font-label-caps text-label-caps hover:opacity-90 transition-opacity">Get Started</v-btn>
+        <v-btn variant="text" to="/login" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors duration-200">Ingresar</v-btn>
+        <v-btn color="primary-container" to="/register" class="bg-primary-container text-on-primary-container px-4 py-2 rounded font-label-caps text-label-caps hover:opacity-90 transition-opacity">Registrarse</v-btn>
       </div>
     </div>
   </nav>
