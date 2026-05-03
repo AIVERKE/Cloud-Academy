@@ -20,12 +20,12 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(initialAuth);
   const user = ref<UserData | null>(initialUser);
 
-  const login = async (email: string) => {
+  const login = async (email: string, password?: string) => {
     try {
       const response = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, password })
       });
 
       if (!response.ok) throw new Error('Error de autenticación');
@@ -51,6 +51,26 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  const register = async (userData: { nombre_completo: string; email: string; password: string }) => {
+    try {
+      const response = await fetch('http://localhost:3000/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error en el registro');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Register Error:', error);
+      throw error;
+    }
+  };
+
   const logout = () => {
     isAuthenticated.value = false;
     user.value = null;
@@ -64,5 +84,5 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-  return { isAuthenticated, user, login, logout, toggleRole };
+  return { isAuthenticated, user, login, logout, toggleRole, register };
 });
