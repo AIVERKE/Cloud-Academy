@@ -63,58 +63,66 @@
             <div class="entrance-item">
               <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="email">E-mail</label>
               <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary" :class="{'text-error': fieldErrors.email}">
                   <span class="material-symbols-outlined text-lg">mail</span>
                 </div>
                 <input 
                   v-model="email"
-                  class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
+                  @input="clearError('email')"
+                  :class="['block w-full pl-10 pr-4 py-3 bg-surface-container-low border rounded-xl text-body-sm focus:outline-none focus:ring-2 transition-all', fieldErrors.email ? 'border-error focus:ring-error/20 focus:border-error' : 'border-outline-variant focus:ring-secondary/20 focus:border-secondary hover:border-outline']" 
                   id="email" 
                   name="email" 
                   placeholder="usuario@ejemplo.com" 
-                  required 
                   type="email"
                 />
               </div>
+              <Transition name="fade">
+                <span v-if="fieldErrors.email" class="text-xs text-error mt-1 ml-1 block">{{ fieldErrors.email }}</span>
+              </Transition>
             </div>
             
             <div class="entrance-item">
               <label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="password">Contraseña</label>
               <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors group-focus-within:text-secondary" :class="{'text-error': fieldErrors.password}">
                   <span class="material-symbols-outlined text-lg">lock</span>
                 </div>
                 <input 
                   v-model="password"
-                  class="block w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all hover:border-outline" 
+                  @input="clearError('password')"
+                  :class="['block w-full pl-10 pr-4 py-3 bg-surface-container-low border rounded-xl text-body-sm focus:outline-none focus:ring-2 transition-all', fieldErrors.password ? 'border-error focus:ring-error/20 focus:border-error' : 'border-outline-variant focus:ring-secondary/20 focus:border-secondary hover:border-outline']" 
                   id="password" 
                   name="password" 
                   placeholder="••••••••" 
-                  required 
                   type="password"
                 />
               </div>
+              <Transition name="fade">
+                <span v-if="fieldErrors.password" class="text-xs text-error mt-1 ml-1 block">{{ fieldErrors.password }}</span>
+              </Transition>
             </div>
           </div>
 
-          <v-alert
-            v-if="error"
-            type="error"
-            variant="tonal"
-            class="rounded-xl entrance-item"
-          >
-            {{ error }}
-          </v-alert>
+          <Transition name="slide-fade">
+            <v-alert
+              v-if="error"
+              type="error"
+              variant="tonal"
+              class="rounded-xl entrance-item"
+            >
+              {{ error }}
+            </v-alert>
+          </Transition>
 
           <div class="flex items-center justify-between entrance-item">
             <label class="flex items-center gap-2 cursor-pointer group">
-              <input type="checkbox" class="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary/20 cursor-pointer"/>
+              <input type="checkbox" v-model="rememberMe" class="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary/20 cursor-pointer"/>
               <span class="text-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Recordarme</span>
             </label>
             <a href="#" class="text-body-sm font-medium text-secondary hover:text-secondary-container transition-colors">¿Olvidaste tu clave?</a>
           </div>
 
-          <div class="entrance-item pt-sm">
+          <div class="entrance-item pt-sm space-y-md">
             <button 
               :disabled="loading"
               class="w-full flex justify-center items-center gap-2 py-4 px-6 bg-primary-container text-white rounded-xl font-mono-data text-mono-data hover:bg-slate-900 focus:ring-4 focus:ring-primary/10 transition-all shadow-lg hover:shadow-primary/20 disabled:opacity-50" 
@@ -124,34 +132,30 @@
               {{ loading ? 'Autenticando...' : 'Iniciar Sesión' }}
               <span v-if="!loading" class="material-symbols-outlined text-lg">login</span>
             </button>
+            
+            <div class="relative flex items-center py-2">
+              <div class="flex-grow border-t border-outline-variant"></div>
+              <span class="flex-shrink-0 mx-4 text-on-surface-variant text-label-sm">o</span>
+              <div class="flex-grow border-t border-outline-variant"></div>
+            </div>
+
+            <button
+              @click.prevent="router.push('/register')"
+              type="button"
+              class="w-full flex justify-center items-center gap-2 py-3 px-6 bg-surface border border-outline text-primary rounded-xl font-mono-data text-mono-data hover:bg-surface-container-low focus:ring-4 focus:ring-primary/10 transition-all"
+            >
+              <span>Crear nueva cuenta</span>
+              <span class="material-symbols-outlined text-lg">person_add</span>
+            </button>
           </div>
         </form>
-
-        <div class="mt-xl text-center entrance-item">
-          <p class="text-body-sm text-on-surface-variant">
-            ¿No tienes una cuenta? 
-            <router-link to="/register" class="font-bold text-secondary hover:underline transition-all">Regístrate aquí</router-link>
-          </p>
-        </div>
-
-        <div class="mt-xl pt-lg border-t border-surface-variant entrance-item">
-          <div class="p-4 bg-secondary-container/10 border border-secondary-container/20 rounded-xl">
-            <div class="flex items-center gap-2 mb-2 text-secondary">
-              <span class="material-symbols-outlined text-lg">info</span>
-              <span class="font-bold text-xs uppercase tracking-wider">Modo de Prueba</span>
-            </div>
-            <p class="text-[11px] leading-relaxed text-on-secondary-container/80">
-              Usa <strong>docente@umsa.bo</strong> o <strong>admin@umsa.bo</strong> para explorar los diferentes roles del sistema.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth';
 import { createTimeline, stagger } from 'animejs';
@@ -160,11 +164,36 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const email = ref('');
-const password = ref('password123');
+const password = ref('');
+const rememberMe = ref(false);
 const loading = ref(false);
 const error = ref('');
 
+const fieldErrors = reactive({
+  email: '',
+  password: ''
+});
+
+const validateEmail = (email: string) => {
+  return String(email)
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
+};
+
+const clearError = (field: 'email' | 'password') => {
+  fieldErrors[field] = '';
+  error.value = '';
+};
+
 onMounted(() => {
+  const savedEmail = localStorage.getItem('ca_remembered_email');
+  if (savedEmail) {
+    email.value = savedEmail;
+    rememberMe.value = true;
+  }
+
   const tl = createTimeline({
     defaults: {
       ease: 'outExpo',
@@ -180,16 +209,35 @@ onMounted(() => {
 });
 
 const submit = async () => {
+  let isValid = true;
+  error.value = '';
+
   if (!email.value) {
-    error.value = 'El correo es requerido';
-    return;
+    fieldErrors.email = 'El correo electrónico es requerido';
+    isValid = false;
+  } else if (!validateEmail(email.value)) {
+    fieldErrors.email = 'El formato del correo es inválido';
+    isValid = false;
   }
 
+  if (!password.value) {
+    fieldErrors.password = 'La contraseña es requerida';
+    isValid = false;
+  }
+
+  if (!isValid) return;
+
   loading.value = true;
-  error.value = '';
 
   try {
     await authStore.login(email.value, password.value);
+    
+    if (rememberMe.value) {
+      localStorage.setItem('ca_remembered_email', email.value);
+    } else {
+      localStorage.removeItem('ca_remembered_email');
+    }
+
     router.push('/dashboard');
   } catch (err) {
     error.value = 'Credenciales inválidas o error de conexión.';
@@ -206,5 +254,26 @@ const submit = async () => {
 input::placeholder {
   color: var(--color-outline);
   opacity: 0.5;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
 }
 </style>

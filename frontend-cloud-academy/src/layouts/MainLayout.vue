@@ -1,9 +1,14 @@
 <template>
   <v-app>
+    <!-- Global App Bar (Desktop & Mobile) -->
+    <v-app-bar color="#0f172a" theme="dark" elevation="0">
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-title class="font-weight-bold text-caption ls-1">API BRIDGE</v-app-bar-title>
+    </v-app-bar>
+
     <!-- Side Navigation Drawer - DARK THEME -->
     <v-navigation-drawer 
       v-model="drawer" 
-      permanent
       class="sidebar-drawer-dark"
       width="280"
       elevation="10"
@@ -25,7 +30,7 @@
             <v-img :src="authStore.user.avatar"></v-img>
           </v-avatar>
           <div class="overflow-hidden">
-            <div class="text-caption text-uppercase font-weight-black text-primary ls-1 mb-n1">
+            <div class="text-caption text-uppercase font-weight-black text-primary ls-1 mb-n1 text-truncate">
               {{ authStore.user.role }}
             </div>
             <div class="text-body-2 font-weight-bold text-white text-truncate">
@@ -61,6 +66,20 @@
       <!-- Bottom Actions -->
       <template v-slot:append>
         <div class="pa-6 bottom-actions-dark">
+          <!-- Return to Landing Button -->
+          <v-btn
+            block
+            color="blue-lighten-4"
+            variant="tonal"
+            rounded="lg"
+            size="large"
+            prepend-icon="mdi-home-outline"
+            to="/"
+            class="text-none font-weight-bold mb-3"
+          >
+            Volver al Inicio
+          </v-btn>
+          
           <!-- Logout Button -->
           <v-btn
             block
@@ -98,7 +117,7 @@ import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const router = useRouter();
-const drawer = ref(true);
+const drawer = ref<boolean | null>(null);
 
 const menuItems = computed(() => {
   const role = authStore.user?.role;
@@ -205,7 +224,13 @@ const handleLogout = () => {
   background-color: #f1f5f9 !important;
 }
 .content-wrapper {
-  padding: 24px;
+  padding: 0;
+}
+
+@media (min-width: 960px) {
+  .content-wrapper {
+    padding: 24px;
+  }
 }
 
 /* Transitions */
