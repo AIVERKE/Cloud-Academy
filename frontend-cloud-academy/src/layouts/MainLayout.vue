@@ -3,7 +3,7 @@
     <!-- Global App Bar (Desktop & Mobile) -->
     <v-app-bar color="#0f172a" theme="dark" elevation="0">
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-app-bar-title class="font-weight-bold text-caption ls-1">API BRIDGE</v-app-bar-title>
+      <v-app-bar-title></v-app-bar-title>
     </v-app-bar>
 
     <!-- Side Navigation Drawer - DARK THEME -->
@@ -19,27 +19,7 @@
           <v-icon icon="mdi-cloud-lock" size="48" color="primary" class="entrance-pop"></v-icon>
           <div class="logo-glow-blue"></div>
         </div>
-        <div class="text-h6 font-weight-black text-white tracking-tight lh-1">API BRIDGE</div>
-        <div class="text-caption text-primary font-weight-bold ls-1 opacity-90">Cloud Academy Suite</div>
-      </div>
-
-      <!-- User Profile Card - Integrated Dark -->
-      <div v-if="authStore.user" class="px-6 mb-6 mt-4">
-        <div class="profile-card-dark pa-4 rounded-xl d-flex align-center">
-          <v-avatar size="44" class="mr-3 profile-avatar-dark">
-            <v-img :src="authStore.user.avatar"></v-img>
-          </v-avatar>
-          <div class="overflow-hidden">
-            <div class="text-caption text-uppercase font-weight-black text-primary ls-1 mb-n1 text-truncate">
-              {{ authStore.user.role }}
-            </div>
-            <div class="text-body-2 font-weight-bold text-white text-truncate">
-              {{ authStore.user.name }}
-            </div>
-          </div>
-          <v-spacer></v-spacer>
-          <v-icon icon="mdi-dots-vertical" size="18" color="white" class="opacity-30"></v-icon>
-        </div>
+        <div class="text-h5 font-weight-black text-white tracking-tight lh-1">Cloud Academy</div>
       </div>
 
       <!-- Navigation Menu -->
@@ -172,16 +152,6 @@ const handleLogout = () => {
   z-index: -1;
 }
 
-/* Profile Card Dark */
-.profile-card-dark {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-}
-.profile-avatar-dark {
-  border: 2px solid rgba(59, 130, 246, 0.5);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-}
 
 /* Nav List Dark */
 .nav-item-dark {
