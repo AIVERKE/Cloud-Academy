@@ -44,7 +44,8 @@ onMounted(() => {
     defaults: {
       ease: 'outExpo',
       duration: 1000
-    }
+    },
+    autoplay: false
   });
 
   tl.add('.vision-card', {
@@ -61,5 +62,23 @@ onMounted(() => {
     opacity: [0, 1],
     delay: stagger(100)
   }, '-=600');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tl.play();
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const section = document.getElementById('vision');
+  if (section) {
+    const cards = section.querySelectorAll('.vision-card, .vision-left, .vision-item');
+    cards.forEach(card => {
+      (card as HTMLElement).style.opacity = '0';
+    });
+    observer.observe(section);
+  }
 });
 </script>
