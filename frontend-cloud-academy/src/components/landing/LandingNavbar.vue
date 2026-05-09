@@ -43,7 +43,7 @@
             <span class="material-symbols-outlined text-sm opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">arrow_forward</span>
           </a>
           
-          <div class="flex flex-col gap-4 mt-4">
+          <div class="flex flex-col gap-4 mt-4"> 
             <v-btn block variant="outlined" to="/login" @click="isMenuOpen = false" class="py-6">Ingresar</v-btn>
             <v-btn block color="primary-container" to="/register" @click="isMenuOpen = false" class="py-6">Registrarse</v-btn>
           </div>

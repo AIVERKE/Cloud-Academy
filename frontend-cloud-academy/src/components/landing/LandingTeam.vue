@@ -20,7 +20,7 @@
 
     <div class="mt-xl text-center max-w-3xl mx-auto team-footer">
       <p class="font-body-md text-body-md text-on-surface-variant italic">
-        "Estamos comprometidos con la innovación y la mejora continua en el ámbito educativo, y creemos firmemente que G-Academic Suite puede marcar una diferencia significativa en nuestra institución."
+        "Estamos comprometidos con la innovación y la mejora continua en el ámbito educativo, y creemos firmemente que G-Academic Suite puede marcar una diferencia significativa en nuestra institución. "
       </p>
     </div>
   </section>

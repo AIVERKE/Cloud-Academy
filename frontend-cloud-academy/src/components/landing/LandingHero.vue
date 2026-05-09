@@ -24,7 +24,7 @@
       <div class="lg:col-span-5 relative mt-12 lg:mt-0 hero-image-container">
         <div class="absolute inset-0 bg-secondary-fixed-dim/20 blur-3xl rounded-full animate-pulse-soft"></div>
         <img 
-          alt="Cloud Data Visualization" 
+          alt="Cloud Data Visualization"  
           class="w-full h-auto rounded-xl border border-surface-variant object-cover shadow-2xl relative z-10 animate-float" 
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEWoGj7tBQGfg0GGghydb3DuC2JCg3yHyHw-IHbooYWbqq1LZ1KbafKCZem7ILZVpqFRZWsCxYoa5Es8GRkE_mWB7S00cXHyP95dsWp3dB5W9CMOwTS4CmVE4iavj-0FYp2H34V1Ym2gnJbDZ_b1rGlRmhcHIvHR0xD4AxMv-CuRbAXTgy4CLZYyrIQ_nhFsFaYdOwW6zl8p8N4wgnjbdO3Xrhu80fmIGD1tL7XiLadNszZMqBJI8ZMtTvsGMlbyOmNSfXtj8QlvI"
         />

@@ -8,7 +8,7 @@
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter features-grid">
-      <!-- Feature 1 -->
+      <!-- Feature 1 --> 
       <div class="bg-surface-container-lowest border border-surface-variant rounded-xl p-lg flex flex-col gap-md card-hover transition-colors group relative overflow-hidden project-card">
         <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary-fixed/30 rounded-full blur-2xl group-hover:bg-primary-fixed/50 transition-colors"></div>
         <div class="w-12 h-12 rounded-lg bg-surface flex items-center justify-center border border-outline-variant relative z-10">

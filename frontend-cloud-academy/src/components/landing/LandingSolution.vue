@@ -8,7 +8,7 @@
       <div class="relative z-10 lg:w-1/2 flex flex-col gap-md solution-text">
         <div class="flex items-center gap-xs">
           <span class="material-symbols-outlined text-secondary-fixed text-3xl">lightbulb</span>
-          <h2 class="font-h2 text-h2 text-on-primary">La Solución</h2>
+          <h2 class="font-h2 text-h2 text-on-primary">La Solución </h2>
         </div>
         <p class="font-body-lg text-body-lg text-on-primary-container leading-relaxed">
           G-Academic Suite surge como una respuesta integral a estos problemas. Nuestra propuesta se basa en la implementación de un 

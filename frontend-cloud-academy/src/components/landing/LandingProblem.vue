@@ -8,7 +8,7 @@
           La fragmentación de la información es un problema crítico, ya que los trabajos se envían a través de correos y 
           aplicaciones de mensajería, lo que dificulta su seguimiento y gestión.
         </p>
-        <p class="font-body-md text-body-md text-on-surface-variant">
+        <p class="font-body-md text-body-md text-on-surface-variant"> 
           Además, la falta de una plataforma adecuada con lleva a la pérdida de integridad y trazabilidad de las entregas, 
           aumentando la vulnerabilidad de los datos almacenados en dispositivos locales. Todo esto, sumado a la ausencia 
           de auditoría en la calificación, pone en riesgo la transparencia y confianza en el sistema educativo.

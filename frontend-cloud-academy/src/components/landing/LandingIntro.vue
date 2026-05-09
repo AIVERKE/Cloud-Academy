@@ -12,7 +12,7 @@
         académicos, garantizando una plataforma robusta y eficiente que promueva 
         la colaboración entre docentes y alumnos. Este enfoque no solo mejora la 
         experiencia educativa, sino que también asegura la integridad y seguridad 
-        de la información.
+        de la información. 
       </p>
     </div>
   </section>
