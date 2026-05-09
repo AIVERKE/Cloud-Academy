@@ -76,7 +76,7 @@
               rounded="lg"
               elevation="2"
               class="px-6"
-              @click="dialog = true"
+              @click="openCreateModal"
             >
               Nueva Tarea
             </v-btn>
@@ -135,6 +135,7 @@
                         rounded="lg"
                         prepend-icon="mdi-pencil-outline"
                         class="text-none"
+                        @click="openEditModal(assignment)"
                       >
                         Editar
                       </v-btn>
@@ -151,7 +152,7 @@
                 variant="text" 
                 color="primary" 
                 class="mt-2"
-                @click="dialog = true"
+                @click="openCreateModal"
               >Crear la primera tarea</v-btn>
             </v-col>
           </v-row>
@@ -231,12 +232,12 @@
       </v-window>
     </v-card>
 
-    <!-- Dialogo Nueva Tarea Premium -->
+    <!-- Dialogo Tarea Premium -->
     <v-dialog v-model="dialog" max-width="600" persistent>
       <v-card class="rounded-xl pa-2">
         <v-card-title class="d-flex justify-space-between align-center px-4 pt-4 pb-0">
-          <span class="text-h5 font-weight-bold">Publicar Nueva Tarea</span>
-          <v-btn icon="mdi-close" variant="text" @click="dialog = false"></v-btn>
+          <span class="text-h5 font-weight-bold">{{ isEditing ? 'Editar Tarea' : 'Publicar Nueva Tarea' }}</span>
+          <v-btn icon="mdi-close" variant="text" @click="closeModal"></v-btn>
         </v-card-title>
         
         <v-card-text class="pa-4">
@@ -296,7 +297,7 @@
             color="slate-500" 
             rounded="lg" 
             class="px-6"
-            @click="dialog = false"
+            @click="closeModal"
           >
             Cancelar
           </v-btn>
@@ -306,9 +307,9 @@
             rounded="lg" 
             class="px-8"
             :loading="creating"
-            @click="createAssignment"
+            @click="saveAssignment"
           >
-            Publicar Tarea
+            {{ isEditing ? 'Guardar Cambios' : 'Publicar Tarea' }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -345,6 +346,9 @@ const dialog = ref(false);
 const valid = ref(false);
 const form = ref<any>(null);
 const creating = ref(false);
+
+const isEditing = ref(false);
+const editingAssignmentId = ref<string | null>(null);
 
 // Default date set to 7 days from now
 const defaultDate = new Date();
@@ -399,7 +403,35 @@ const loadStudents = async () => {
   }
 };
 
-const createAssignment = async () => {
+const openCreateModal = () => {
+  isEditing.value = false;
+  editingAssignmentId.value = null;
+  newAssignment.value = {
+    titulo: '',
+    descripcion: '',
+    fecha_limite: defaultDate.toISOString().split('T')[0]
+  };
+  dialog.value = true;
+};
+
+const openEditModal = (assignment: any) => {
+  isEditing.value = true;
+  editingAssignmentId.value = assignment.id;
+  newAssignment.value = {
+    titulo: assignment.titulo,
+    descripcion: assignment.descripcion || '',
+    fecha_limite: new Date(assignment.fecha_limite).toISOString().split('T')[0]
+  };
+  dialog.value = true;
+};
+
+const closeModal = () => {
+  dialog.value = false;
+  isEditing.value = false;
+  editingAssignmentId.value = null;
+};
+
+const saveAssignment = async () => {
   const { valid: isFormValid } = await form.value.validate();
   if (!isFormValid) return;
 
@@ -408,24 +440,28 @@ const createAssignment = async () => {
     // Append end of day time
     const isoDate = new Date(newAssignment.value.fecha_limite + 'T23:59:59').toISOString();
 
-    await dataStore.createAssignment({
-      aulaId: classroomId,
-      titulo: newAssignment.value.titulo,
-      descripcion: newAssignment.value.descripcion,
-      fecha_limite: isoDate
-    });
+    if (isEditing.value && editingAssignmentId.value) {
+      await dataStore.updateAssignment(editingAssignmentId.value, {
+        aulaId: classroomId,
+        titulo: newAssignment.value.titulo,
+        descripcion: newAssignment.value.descripcion,
+        fecha_limite: isoDate
+      });
+      showSnackbar('¡Tarea actualizada exitosamente! 🚀', 'success');
+    } else {
+      await dataStore.createAssignment({
+        aulaId: classroomId,
+        titulo: newAssignment.value.titulo,
+        descripcion: newAssignment.value.descripcion,
+        fecha_limite: isoDate
+      });
+      showSnackbar('¡Tarea publicada exitosamente! 🚀', 'success');
+    }
 
-    dialog.value = false;
-    newAssignment.value = {
-      titulo: '',
-      descripcion: '',
-      fecha_limite: defaultDate.toISOString().split('T')[0]
-    };
-
-    showSnackbar('¡Tarea publicada exitosamente! 🚀', 'success');
+    closeModal();
     await loadAssignments();
   } catch (error) {
-    showSnackbar('Error al crear tarea', 'error');
+    showSnackbar(isEditing.value ? 'Error al actualizar tarea' : 'Error al crear tarea', 'error');
   } finally {
     creating.value = false;
   }
