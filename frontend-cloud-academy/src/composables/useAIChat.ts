@@ -1,4 +1,4 @@
-import { reactive, ref } from 'vue';
+import { reactive } from 'vue';
 import axios from 'axios';
 import type { ChatState, ChatMessage } from '../types/ai-chat';
 
