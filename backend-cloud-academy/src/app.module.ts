@@ -12,6 +12,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { ResourcesModule } from './resources/resources.module';
 import { AdminModule } from './admin/admin.module';
+import { AiChatModule } from './ai-chat/ai-chat.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AdminModule } from './admin/admin.module';
     GoogleModule,
     ResourcesModule,
     AdminModule,
+    AiChatModule,
   ],
   controllers: [AppController],
   providers: [

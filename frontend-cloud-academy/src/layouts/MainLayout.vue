@@ -87,6 +87,9 @@
         </router-view>
       </div>
     </v-main>
+
+    <!-- AI Assistant Module -->
+    <AIAssistant />
   </v-app>
 </template>
 
@@ -94,6 +97,7 @@
 import { ref, computed } from 'vue';
 import { useAuthStore } from '../store/auth';
 import { useRouter } from 'vue-router';
+import AIAssistant from '../components/AIAssistant/AIAssistant.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
