@@ -1,12 +1,11 @@
 <template>
-  <v-container fluid class="pa-8 bg-slate-50 min-h-screen">
+  <v-container fluid class="pa-0 bg-slate-50 min-h-screen">
     <!-- Welcome Header with Professional Gradient (Landing Match) -->
-    <v-row>
+    <v-row no-gutters>
       <v-col cols="12">
         <v-card
-          class="welcome-card mb-8 overflow-hidden"
+          class="welcome-card mb-8 overflow-hidden rounded-0"
           elevation="0"
-          rounded="xl"
         >
           <v-card-text class="pa-12 relative z-10">
             <v-row>
@@ -34,97 +33,24 @@
     </v-row>
 
     <!-- Role-Based Statistics Grid -->
-    <v-row>
-      <v-col v-for="(stat, index) in currentStats" :key="index" cols="12" sm="6" md="3">
-        <v-card class="stat-card border" rounded="xl" elevation="0">
-          <v-card-text class="d-flex align-center pa-6">
-            <v-avatar :color="stat.color + '-lighten-5'" size="64" rounded="xl" class="mr-4">
-              <v-icon :icon="stat.icon" :color="stat.color" size="32"></v-icon>
-            </v-avatar>
-            <div>
-              <div class="text-overline mb-0 text-grey-darken-1 font-weight-bold">{{ stat.label }}</div>
-              <div class="text-h4 font-weight-black text-slate-900">{{ stat.value }}</div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
+    <v-row class="px-4 px-md-8">
+      <StatCardsGrid :stats="currentStats" />
     </v-row>
 
     <!-- Main Content Area -->
-    <v-row class="mt-8">
-      <!-- Recent Activity / News (Only for Root) -->
+    <v-row class="mt-8 px-4 px-md-8 pb-8">
+      <!-- Recent Activity / News -->
       <v-col v-if="authStore.user?.role === 'Root'" cols="12" md="8">
-        <v-card rounded="xl" elevation="0" class="border">
-          <v-card-title class="pa-6 d-flex align-center">
-            <div class="d-flex align-center">
-              <v-avatar color="primary-lighten-5" size="40" class="mr-3">
-                <v-icon icon="mdi-pulse" color="primary"></v-icon>
-              </v-avatar>
-              <span class="text-h5 font-weight-bold text-slate-900">Actividad del Sistema</span>
-            </div>
-            <v-spacer></v-spacer>
-            <v-btn variant="text" color="primary" class="font-weight-bold">Ver todo</v-btn>
-          </v-card-title>
-          <v-divider></v-divider>
-          <v-list class="pa-0">
-            <v-list-item
-              v-for="(item, i) in activities"
-              :key="i"
-              class="pa-6 border-b last:border-0"
-              :class="{ 'bg-slate-50/50': i % 2 === 0 }"
-            >
-              <template v-slot:prepend>
-                <v-avatar :color="item.color" size="44" class="mr-4 elevation-1">
-                  <v-icon :icon="item.icon" color="white" size="22"></v-icon>
-                </v-avatar>
-              </template>
-              <v-list-item-title class="font-weight-black text-slate-900">{{ item.title }}</v-list-item-title>
-              <v-list-item-subtitle class="text-slate-600 mt-1">{{ item.time }} — {{ item.description }}</v-list-item-subtitle>
-              <template v-slot:append>
-                <v-chip 
-                  size="small" 
-                  variant="flat" 
-                  color="grey-darken-4" 
-                  class="font-weight-bold uppercase"
-                >
-                  {{ item.tag }}
-                </v-chip>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card>
+        <SystemActivityList title="Actividad del Sistema" :activities="activities" />
       </v-col>
 
       <!-- Quick Actions / Context Menu -->
-      <v-col cols="12" md="4">
-        <v-card rounded="xl" elevation="0" class="border bg-white h-100">
-          <v-card-title class="pa-6 text-h5 font-weight-bold text-slate-900">
-            Acciones Rápidas
-          </v-card-title>
-          <v-card-text class="pa-6 pt-0">
-            <v-btn
-              v-for="action in quickActions"
-              :key="action.title"
-              block
-              :color="action.color"
-              variant="tonal"
-              rounded="xl"
-              size="large"
-              class="mb-4 py-6 d-flex justify-start text-none"
-              :to="action.to"
-              :loading="isSyncing && action.title === 'Sincronizar Drive'"
-              @click="action.handler ? action.handler() : null"
-            >
-              <template v-slot:prepend>
-                <v-icon :icon="action.icon" class="mr-4"></v-icon>
-              </template>
-              <div class="text-left">
-                <div class="font-weight-bold">{{ action.title }}</div>
-                <div class="text-caption opacity-70">{{ action.desc }}</div>
-              </div>
-            </v-btn>
-          </v-card-text>
-        </v-card>
+      <v-col cols="12" :md="authStore.user?.role === 'Root' ? 4 : 12">
+        <QuickActionsMenu 
+          title="Acciones Rápidas" 
+          :actions="quickActions" 
+          :loadingAction="isSyncing ? 'Sincronizar Drive' : undefined"
+        />
       </v-col>
     </v-row>
 
@@ -192,6 +118,10 @@
 import { computed, ref, onMounted } from 'vue';
 import { useAuthStore } from '../store/auth';
 import { useDataStore } from '../store/data';
+
+import StatCardsGrid from '../components/dashboard/StatCardsGrid.vue';
+import SystemActivityList from '../components/dashboard/SystemActivityList.vue';
+import QuickActionsMenu from '../components/dashboard/QuickActionsMenu.vue';
 
 const authStore = useAuthStore();
 const dataStore = useDataStore();

@@ -35,7 +35,7 @@
     </v-row>
 
     <!-- Empty State -->
-    <v-row v-else-if="filteredResources.length === 0" class="py-16">
+    <v-row v-else-if="groupedResources.length === 0" class="py-16">
       <v-col cols="12" class="text-center">
         <v-avatar size="160" color="slate-100" class="mb-6">
           <v-icon icon="mdi-folder-open-outline" size="80" color="slate-300"></v-icon>
@@ -45,57 +45,79 @@
       </v-col>
     </v-row>
 
-    <!-- Resources Grid -->
-    <v-row v-else>
-      <v-col v-for="item in filteredResources" :key="item.id" cols="12" sm="6" md="4" lg="3">
-        <v-card class="resource-card border-0 overflow-hidden h-100" rounded="xl" elevation="1">
-          <!-- File Type Background Header -->
-          <div class="file-header" :class="getFileTypeColorClass(item.mimeType)">
-            <v-icon :icon="getFileIcon(item.mimeType)" size="56" color="white" class="icon-glow"></v-icon>
-            <div class="header-overlay"></div>
+    <!-- Resources Groups -->
+    <v-expansion-panels v-else multiple variant="accordion" class="mt-4" v-model="openedPanels">
+      <v-expansion-panel
+        v-for="category in groupedResources"
+        :key="category.id"
+        :value="category.id"
+        class="border-0 mb-4 rounded-xl overflow-hidden bg-white"
+        elevation="1"
+      >
+        <v-expansion-panel-title class="py-4 px-6">
+          <div class="d-flex align-center">
+            <v-icon :icon="category.icon" color="primary" class="mr-3" size="28"></v-icon>
+            <span class="text-h6 font-weight-bold text-slate-800">{{ category.name }}</span>
+            <v-chip class="ml-4 font-weight-bold" color="primary" variant="tonal" size="small">
+              {{ category.items.length }}
+            </v-chip>
           </div>
-          
-          <v-card-text class="pa-6">
-            <div class="d-flex align-center justify-space-between mb-2">
-              <v-chip size="x-small" class="font-weight-black px-3" :color="getFileTypeColor(item.mimeType)" variant="flat" rounded="lg">
-                {{ getFileTypeName(item.mimeType) }}
-              </v-chip>
-              <v-icon icon="mdi-dots-vertical" size="18" color="slate-300"></v-icon>
-            </div>
-            
-            <h3 class="text-h6 font-weight-black text-slate-900 mb-4 line-clamp-2" :title="item.name">
-              {{ item.name }}
-            </h3>
+        </v-expansion-panel-title>
 
-            <div class="d-flex align-center text-caption text-slate-500 mb-6 font-weight-medium">
-              <v-avatar size="20" class="mr-2 opacity-80">
-                <v-img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png"></v-img>
-              </v-avatar>
-              Google Cloud Asset
-            </div>
+        <v-expansion-panel-text class="bg-slate-50 pt-4 px-6 pb-6">
+          <v-row>
+            <v-col v-for="item in category.items" :key="item.id" cols="12" sm="6" md="4" lg="3">
+              <v-card class="resource-card border-0 overflow-hidden h-100" rounded="xl" elevation="1">
+                <!-- File Type Background Header -->
+                <div class="file-header" :class="getFileTypeColorClass(item.mimeType)">
+                  <v-icon :icon="getFileIcon(item.mimeType)" size="56" color="white" class="icon-glow"></v-icon>
+                  <div class="header-overlay"></div>
+                </div>
+                
+                <v-card-text class="pa-6">
+                  <div class="d-flex align-center justify-space-between mb-2">
+                    <v-chip size="x-small" class="font-weight-black px-3" :color="getFileTypeColor(item.mimeType)" variant="flat" rounded="lg">
+                      {{ getFileTypeName(item.mimeType) }}
+                    </v-chip>
+                    <v-icon icon="mdi-dots-vertical" size="18" color="slate-300"></v-icon>
+                  </div>
+                  
+                  <h3 class="text-h6 font-weight-black text-slate-900 mb-4 line-clamp-2" :title="item.name">
+                    {{ item.name }}
+                  </h3>
 
-            <v-btn
-              block
-              color="primary"
-              variant="flat"
-              rounded="lg"
-              :href="item.webViewLink"
-              target="_blank"
-              prepend-icon="mdi-eye-outline"
-              class="text-none font-weight-bold py-6"
-              elevation="0"
-            >
-              Visualizar
-            </v-btn>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+                  <div class="d-flex align-center text-caption text-slate-500 mb-6 font-weight-medium">
+                    <v-avatar size="20" class="mr-2 opacity-80">
+                      <v-img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png"></v-img>
+                    </v-avatar>
+                    Google Cloud Asset
+                  </div>
+
+                  <v-btn
+                    block
+                    color="primary"
+                    variant="flat"
+                    rounded="lg"
+                    :href="item.webViewLink"
+                    target="_blank"
+                    prepend-icon="mdi-eye-outline"
+                    class="text-none font-weight-bold py-6"
+                    elevation="0"
+                  >
+                    Visualizar
+                  </v-btn>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 
 interface Resource {
@@ -106,9 +128,21 @@ interface Resource {
   mimeType: string;
 }
 
+const CATEGORIES = [
+  { id: 'images', name: 'Imágenes', icon: 'mdi-image-multiple' },
+  { id: 'pdfs', name: 'Documentos PDF', icon: 'mdi-file-pdf-box' },
+  { id: 'office', name: 'Documentos de Oficina', icon: 'mdi-file-document-outline' },
+  { id: 'spreadsheets', name: 'Hojas de Cálculo', icon: 'mdi-google-spreadsheet' },
+  { id: 'presentations', name: 'Presentaciones', icon: 'mdi-presentation' },
+  { id: 'videos', name: 'Videos', icon: 'mdi-video' },
+  { id: 'code', name: 'Código y Scripts', icon: 'mdi-code-braces' },
+  { id: 'others', name: 'Otros archivos', icon: 'mdi-file' }
+];
+
 const resources = ref<Resource[]>([]);
 const loading = ref(true);
 const search = ref('');
+const openedPanels = ref<string[]>([]);
 
 const fetchResources = async () => {
   try {
@@ -121,13 +155,56 @@ const fetchResources = async () => {
   }
 };
 
-const filteredResources = computed(() => {
-  if (!search.value) return resources.value;
-  const q = search.value.toLowerCase();
-  return resources.value.filter(r => 
-    r.name.toLowerCase().includes(q) || 
-    getFileTypeName(r.mimeType).toLowerCase().includes(q)
-  );
+const getFileCategory = (file: Resource) => {
+  const mime = (file.mimeType || '').toLowerCase();
+  const name = (file.name || '').toLowerCase();
+  
+  const extensionMatch = name.match(/\.([^.]+)$/);
+  const ext = extensionMatch ? extensionMatch[1] : '';
+
+  const codeExts = ['js', 'ts', 'jsx', 'tsx', 'py', 'java', 'cpp', 'c', 'go', 'rs', 'rb', 'php', 'html', 'css', 'json', 'yaml', 'yml', 'md', 'sql', 'sh', 'bat'];
+  if (codeExts.includes(ext)) return 'code';
+
+  if (mime.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico'].includes(ext)) return 'images';
+  if (mime === 'application/pdf' || ext === 'pdf') return 'pdfs';
+  if (mime === 'application/msword' || mime.includes('wordprocessingml') || mime === 'text/plain' || ['doc', 'docx', 'txt', 'rtf'].includes(ext)) return 'office';
+  if (mime === 'application/vnd.ms-excel' || mime.includes('spreadsheetml') || ['xls', 'xlsx', 'csv'].includes(ext)) return 'spreadsheets';
+  if (mime === 'application/vnd.ms-powerpoint' || mime.includes('presentationml') || ['ppt', 'pptx'].includes(ext)) return 'presentations';
+  if (mime.startsWith('video/') || ['mp4', 'webm', 'avi', 'mkv', 'mov'].includes(ext)) return 'videos';
+
+  return 'others';
+};
+
+const groupedResources = computed(() => {
+  const filtered = search.value 
+    ? resources.value.filter(r => 
+        r.name.toLowerCase().includes(search.value.toLowerCase()) || 
+        getFileTypeName(r.mimeType).toLowerCase().includes(search.value.toLowerCase())
+      )
+    : resources.value;
+
+  const groups = CATEGORIES.map(cat => ({
+    ...cat,
+    items: [] as Resource[]
+  }));
+
+  filtered.forEach(file => {
+    const catId = getFileCategory(file);
+    const group = groups.find(g => g.id === catId);
+    if (group) {
+      group.items.push(file);
+    }
+  });
+
+  return groups.filter(g => g.items.length > 0);
+});
+
+watch(search, (newVal) => {
+  if (newVal) {
+    openedPanels.value = groupedResources.value.map(g => g.id);
+  } else {
+    openedPanels.value = [];
+  }
 });
 
 const getFileIcon = (mimeType: string) => {

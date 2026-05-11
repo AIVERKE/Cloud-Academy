@@ -1,9 +1,14 @@
 <template>
   <v-app>
+    <!-- Global App Bar (Desktop & Mobile) -->
+    <v-app-bar color="#0f172a" theme="dark" elevation="0">
+      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-title></v-app-bar-title>
+    </v-app-bar>
+
     <!-- Side Navigation Drawer - DARK THEME -->
     <v-navigation-drawer 
       v-model="drawer" 
-      permanent
       class="sidebar-drawer-dark"
       width="280"
       elevation="10"
@@ -14,27 +19,7 @@
           <v-icon icon="mdi-cloud-lock" size="48" color="primary" class="entrance-pop"></v-icon>
           <div class="logo-glow-blue"></div>
         </div>
-        <div class="text-h6 font-weight-black text-white tracking-tight lh-1">API BRIDGE</div>
-        <div class="text-caption text-primary font-weight-bold ls-1 opacity-90">Cloud Academy Suite</div>
-      </div>
-
-      <!-- User Profile Card - Integrated Dark -->
-      <div v-if="authStore.user" class="px-6 mb-6 mt-4">
-        <div class="profile-card-dark pa-4 rounded-xl d-flex align-center">
-          <v-avatar size="44" class="mr-3 profile-avatar-dark">
-            <v-img :src="authStore.user.avatar"></v-img>
-          </v-avatar>
-          <div class="overflow-hidden">
-            <div class="text-caption text-uppercase font-weight-black text-primary ls-1 mb-n1">
-              {{ authStore.user.role }}
-            </div>
-            <div class="text-body-2 font-weight-bold text-white text-truncate">
-              {{ authStore.user.name }}
-            </div>
-          </div>
-          <v-spacer></v-spacer>
-          <v-icon icon="mdi-dots-vertical" size="18" color="white" class="opacity-30"></v-icon>
-        </div>
+        <div class="text-h5 font-weight-black text-white tracking-tight lh-1">Cloud Academy</div>
       </div>
 
       <!-- Navigation Menu -->
@@ -61,6 +46,20 @@
       <!-- Bottom Actions -->
       <template v-slot:append>
         <div class="pa-6 bottom-actions-dark">
+          <!-- Return to Landing Button -->
+          <v-btn
+            block
+            color="blue-lighten-4"
+            variant="tonal"
+            rounded="lg"
+            size="large"
+            prepend-icon="mdi-home-outline"
+            to="/"
+            class="text-none font-weight-bold mb-3"
+          >
+            Volver al Inicio
+          </v-btn>
+          
           <!-- Logout Button -->
           <v-btn
             block
@@ -88,6 +87,9 @@
         </router-view>
       </div>
     </v-main>
+
+    <!-- AI Assistant Module -->
+    <AIAssistant />
   </v-app>
 </template>
 
@@ -95,10 +97,11 @@
 import { ref, computed } from 'vue';
 import { useAuthStore } from '../store/auth';
 import { useRouter } from 'vue-router';
+import AIAssistant from '../components/AIAssistant/AIAssistant.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
-const drawer = ref(true);
+const drawer = ref<boolean | null>(null);
 
 const menuItems = computed(() => {
   const role = authStore.user?.role;
@@ -153,16 +156,6 @@ const handleLogout = () => {
   z-index: -1;
 }
 
-/* Profile Card Dark */
-.profile-card-dark {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-}
-.profile-avatar-dark {
-  border: 2px solid rgba(59, 130, 246, 0.5);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
-}
 
 /* Nav List Dark */
 .nav-item-dark {
@@ -205,7 +198,13 @@ const handleLogout = () => {
   background-color: #f1f5f9 !important;
 }
 .content-wrapper {
-  padding: 24px;
+  padding: 0;
+}
+
+@media (min-width: 960px) {
+  .content-wrapper {
+    padding: 24px;
+  }
 }
 
 /* Transitions */
