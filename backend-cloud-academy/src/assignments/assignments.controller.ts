@@ -1,7 +1,7 @@
-import { Controller, Post, Get, Body, Param, Headers } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Headers } from '@nestjs/common';
 import { AssignmentsService } from './assignments.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
-
+import { UpdateAssignmentDto } from './dto/update-assignment.dto';
 @Controller('aulas')
 export class AssignmentsController {
   constructor(private readonly assignmentsService: AssignmentsService) {}
@@ -22,5 +22,13 @@ export class AssignmentsController {
     @Body() createAssignmentDto: CreateAssignmentDto,
   ) {
     return await this.assignmentsService.create(aulaId, createAssignmentDto);
+  }
+
+  @Patch(':aula_id/tareas/:id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateAssignmentDto: UpdateAssignmentDto,
+  ) {
+    return await this.assignmentsService.update(id, updateAssignmentDto);
   }
 }

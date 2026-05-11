@@ -155,6 +155,25 @@ export const useDataStore = defineStore('data', () => {
     }
   };
 
+  const updateAssignment = async (tareaId: string, assignment: { aulaId: string, titulo?: string, descripcion?: string, fecha_limite?: string }) => {
+    try {
+      const response = await fetch(`http://localhost:3000/aulas/${assignment.aulaId}/tareas/${tareaId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titulo: assignment.titulo,
+          descripcion: assignment.descripcion,
+          fecha_limite: assignment.fecha_limite
+        })
+      });
+      if (!response.ok) throw new Error('Error updating assignment');
+      return await response.json();
+    } catch (error) {
+      console.error('Update Assignment Error:', error);
+      throw error;
+    }
+  };
+
   const fetchSubmissions = async (tareaId: string) => {
     try {
       const response = await fetch(`http://localhost:3000/entregas/tarea/${tareaId}`);
@@ -398,7 +417,7 @@ export const useDataStore = defineStore('data', () => {
   return {
     classrooms, assignments, submissions, auditLogs,
     fetchClassrooms, createClassroom,
-    fetchAssignments, createAssignment,
+    fetchAssignments, createAssignment, updateAssignment,
     fetchSubmissions, updateSubmissionGrade, submitAssignment,
     fetchAuditLogs, syncDriveResources, fetchLastSyncTime, fetchSheetData, fetchDashboardStats, fetchTeacherStats,
     exportLogsToSheet,
