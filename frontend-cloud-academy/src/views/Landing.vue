@@ -4,8 +4,12 @@
     
     <main class="flex-grow">
       <LandingHero />
-      <LandingFeatures />
+      <LandingIntro />
+      <LandingProblem />
+      <LandingSolution />
+      <LandingProject />
       <LandingVision />
+      <LandingTeam />
     </main>
 
     <LandingFooter />
@@ -15,8 +19,12 @@
 <script setup lang="ts">
 import LandingNavbar from '../components/landing/LandingNavbar.vue';
 import LandingHero from '../components/landing/LandingHero.vue';
-import LandingFeatures from '../components/landing/LandingFeatures.vue';
+import LandingIntro from '../components/landing/LandingIntro.vue';
+import LandingProblem from '../components/landing/LandingProblem.vue';
+import LandingSolution from '../components/landing/LandingSolution.vue';
+import LandingProject from '../components/landing/LandingProject.vue';
 import LandingVision from '../components/landing/LandingVision.vue';
+import LandingTeam from '../components/landing/LandingTeam.vue';
 import LandingFooter from '../components/landing/LandingFooter.vue';
 </script>
 

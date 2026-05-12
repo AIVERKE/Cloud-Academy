@@ -26,7 +26,7 @@
           </template>
           <v-list-item-title class="font-weight-black text-slate-900 text-wrap">{{ item.title }}</v-list-item-title>
           <v-list-item-subtitle class="text-slate-600 mt-1 text-wrap" style="line-height: 1.4;">{{ item.time }} — {{ item.description }}</v-list-item-subtitle>
-          <template v-slot:append>
+          <template v-slot:append> 
             <v-chip 
               size="small" 
               variant="flat" 
