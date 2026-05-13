@@ -3,7 +3,7 @@
     <v-card-title class="pa-6 text-h5 font-weight-bold text-slate-900">
       {{ title }}
     </v-card-title>
-    <v-card-text class="pa-6 pt-0">
+    <v-card-text class="pa-6 pt-0"> 
       <v-hover v-for="(action, index) in actions" :key="index" v-slot="{ isHovering, props }">
         <v-btn
           v-bind="props"

@@ -9,7 +9,7 @@
           rounded="xl"
           :class="{'on-hover': isHovering}"
         >
-          <v-card-text class="d-flex align-center pa-6">
+          <v-card-text class="d-flex align-center pa-6"> 
             <v-avatar :color="stat.color + '-lighten-5'" size="64" rounded="xl" class="mr-4 transition-all" :class="{'avatar-hover': isHovering}">
               <v-icon :icon="stat.icon" :color="stat.color" size="32"></v-icon>
             </v-avatar>
