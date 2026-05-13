@@ -5,7 +5,7 @@
       <div class="relative z-10 md:w-1/3 flex flex-col gap-md vision-left">
         <h2 class="font-h2 text-h2 text-on-primary">Visión</h2>
         <p class="font-body-lg text-body-lg text-on-primary-container italic border-l-4 border-secondary pl-4">
-          "Integración invisible para una gestión visible."
+          "Integración invisible para una gestión visible. "
         </p>
       </div>
       <div class="relative z-10 md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-lg vision-right">
@@ -44,7 +44,8 @@ onMounted(() => {
     defaults: {
       ease: 'outExpo',
       duration: 1000
-    }
+    },
+    autoplay: false
   });
 
   tl.add('.vision-card', {
@@ -61,5 +62,23 @@ onMounted(() => {
     opacity: [0, 1],
     delay: stagger(100)
   }, '-=600');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tl.play();
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const section = document.getElementById('vision');
+  if (section) {
+    const cards = section.querySelectorAll('.vision-card, .vision-left, .vision-item');
+    cards.forEach(card => {
+      (card as HTMLElement).style.opacity = '0';
+    });
+    observer.observe(section);
+  }
 });
 </script>

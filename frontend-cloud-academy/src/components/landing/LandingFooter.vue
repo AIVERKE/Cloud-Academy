@@ -12,7 +12,7 @@
         <a class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 underline-offset-4 hover:underline" href="#">Contact Support</a>
       </div>
     </div>
-  </footer>
+  </footer> 
 </template>
 
 <script setup lang="ts">
