@@ -4,6 +4,8 @@
     
     <main class="flex-grow">
       <LandingHero />
+      
+      <!-- Secciones de la Landing -->
       <LandingIntro />
       <LandingProblem />
       <LandingSolution />
