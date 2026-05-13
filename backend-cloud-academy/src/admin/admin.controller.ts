@@ -10,7 +10,7 @@ import { RolNombre } from '../auth/entities/role.entity';
 @UseGuards(AuthGuard, RolesGuard)
 @Roles(RolNombre.Root)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) { }
 
   @Get('stats')
   getStats() {
@@ -31,7 +31,8 @@ export class AdminController {
 
   @Get('sheet-data')
   async getSheetData(@Query('spreadsheetId') spreadsheetId: string) {
-    return this.adminService.getSheetData(spreadsheetId);
+    const id = spreadsheetId || process.env.GOOGLE_SHEET_ID || process.env.GOOGLE_SHEETS_ID;
+    return this.adminService.getSheetData(id!);
   }
 
   @Post('export-logs')
