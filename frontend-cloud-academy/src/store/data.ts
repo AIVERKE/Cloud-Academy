@@ -109,6 +109,27 @@ export const useDataStore = defineStore('data', () => {
     }
   };
 
+  const updateClassroom = async (classroomId: string, data: { name?: string, description?: string }, userId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3000/aulas/${classroomId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'user-id': userId 
+        },
+        body: JSON.stringify({
+          nombre: data.name,
+          descripcion: data.description
+        })
+      });
+      if (!response.ok) throw new Error('Error al actualizar aula');
+      return await response.json();
+    } catch (error) {
+      console.error('Update Classroom Error:', error);
+      throw error;
+    }
+  };
+
   const fetchAssignments = async (aulaId?: string) => {
     try {
       // Safeguard against literal "undefined" string from route params
@@ -416,7 +437,7 @@ export const useDataStore = defineStore('data', () => {
 
   return {
     classrooms, assignments, submissions, auditLogs,
-    fetchClassrooms, createClassroom,
+    fetchClassrooms, createClassroom, updateClassroom,
     fetchAssignments, createAssignment, updateAssignment,
     fetchSubmissions, updateSubmissionGrade, submitAssignment,
     fetchAuditLogs, syncDriveResources, fetchLastSyncTime, fetchSheetData, fetchDashboardStats, fetchTeacherStats,

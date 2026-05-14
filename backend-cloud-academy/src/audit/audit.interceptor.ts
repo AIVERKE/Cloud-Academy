@@ -4,8 +4,8 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, from } from 'rxjs';
+import { tap, mergeMap, map } from 'rxjs/operators';
 import { AuditService } from './audit.service';
 import { Reflector } from '@nestjs/core';
 
@@ -27,14 +27,22 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     return next.handle().pipe(
-      tap(() => {
-        // Run audit logging after the request was successfully handled
-        this.logAction(context, request);
+      mergeMap(async (data) => {
+        const syncResult = await this.logAction(context, request);
+        
+        // If there was a sync error, inject it into the response object
+        if (syncResult && syncResult.success === false) {
+          if (data && typeof data === 'object') {
+            data._auditSyncError = syncResult.error || true;
+          }
+        }
+        
+        return data;
       }),
     );
   }
 
-  private logAction(context: ExecutionContext, request: any) {
+  private async logAction(context: ExecutionContext, request: any) {
     const userId = request.user?.id || null;
 
     // Check for custom @AuditLog decorator
@@ -46,7 +54,6 @@ export class AuditInterceptor implements NestInterceptor {
     // The request body will be sanitized inside the AuditService
     const detalle = request.body;
 
-    // Fire and forget - the service has internal error handling
-    this.auditService.createLog(userId, action, detalle);
+    return await this.auditService.createLog(userId, action, detalle);
   }
 }

@@ -38,10 +38,9 @@ export class AuditService {
     return sanitized;
   }
 
-  async createLog(usuario_id: string | null, accion: string, detalle: any): Promise<void> {
+  async createLog(usuario_id: string | null, accion: string, detalle: any): Promise<{ success: boolean, error?: string } | null> {
     try {
       const sanitizedDetalle = this.sanitizeBody(detalle);
-
       const log = this.auditRepository.create({
         usuario_id,
         accion,
@@ -50,17 +49,29 @@ export class AuditService {
 
       const savedLog = await this.auditRepository.save(log);
 
-      // Sync with Google Sheets in background
-      this.syncWithGoogleSheets(savedLog).catch(err => {
+      try {
+        const result = await this.syncWithGoogleSheets(savedLog);
+        return result === undefined ? null : { success: true };
+      } catch (err) {
         this.logger.error(`Failed to sync log to Google Sheets: ${err.message}`);
-      });
-
+        return { success: false, error: err.message };
+      }
     } catch (error) {
       this.logger.error(`Failed to create audit log: ${error.message}`, error.stack);
+      return null;
     }
   }
 
   private async syncWithGoogleSheets(log: LogAuditoria) {
+    const sheetId = process.env.GOOGLE_SHEET_ID;
+    const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+
+    if (!sheetId || !credentialsPath) {
+      // Si no hay configuración de Google Sheets, ignoramos el sync de forma silenciosa
+      // o con un log de debug si fuera necesario.
+      return;
+    }
+
     const timestamp = new Date(log.fecha_hora).toLocaleString('es-BO');
     const values = [
       timestamp,
@@ -69,7 +80,12 @@ export class AuditService {
       JSON.stringify(log.detalle)
     ];
 
-    await this.googleService.appendRowToSheet(process.env.GOOGLE_SHEET_ID || '', 'Hoja 1!A:D', values);
+    try {
+      await this.googleService.appendRowToSheet(sheetId, 'Hoja 1!A:D', values);
+    } catch (err) {
+      // Re-throw to be caught by the caller's catch block
+      throw err;
+    }
   }
 
   async getLogs(): Promise<LogAuditoria[]> {
