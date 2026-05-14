@@ -60,15 +60,25 @@
           </v-card-title>
           <v-card-text class="px-6 pb-6">
             <div class="d-flex flex-column gap-4">
-              <v-btn
-                variant="tonal"
-                color="secondary"
-                prepend-icon="mdi-table-edit"
-                @click="handleFetchSheet"
-                class="flex-grow-1"
-              >
-                Explorar Sheet
-              </v-btn>
+              <div class="d-flex gap-4">
+                <v-btn
+                  variant="tonal"
+                  color="secondary"
+                  prepend-icon="mdi-table-edit"
+                  @click="handleFetchSheet"
+                  class="flex-grow-1"
+                >
+                  Explorar Sheet
+                </v-btn>
+                <v-btn
+                  variant="flat"
+                  color="info"
+                  prepend-icon="mdi-link-variant"
+                  @click="openSheet"
+                >
+                  Abrir Drive
+                </v-btn>
+              </div>
               <v-btn
                 block
                 color="info"
