@@ -224,7 +224,7 @@
           <p class="text-body-2 text-slate-500 mb-6">
             Ingresá el código de acceso proporcionado por tu docente para inscribirte instantáneamente.
           </p>
-          <v-form ref="joinForm" v-model="joinValid" @submit.prevent="handleJoinByCode">
+          <v-form v-model="joinValid" @submit.prevent="handleJoinByCode">
             <v-text-field
               v-model="manualCode"
               label="Código de Acceso"
@@ -291,7 +291,7 @@ const enrollingId = ref<string | null>(null);
 const joining = ref(false);
 const manualCode = ref('');
 const joinValid = ref(false);
-const joinForm = ref<any>(null);
+
 
 const snackbar = ref({ show: false, text: '', color: 'success' });
 
