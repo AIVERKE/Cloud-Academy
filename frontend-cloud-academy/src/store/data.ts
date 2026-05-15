@@ -284,7 +284,10 @@ export const useDataStore = defineStore('data', () => {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al inscribirse en el aula');
+        const errorMessage = Array.isArray(errorData.message) 
+          ? errorData.message[0] 
+          : (errorData.message || 'Error al inscribirse en el aula');
+        throw new Error(errorMessage);
       }
       return await response.json();
     } catch (error) {

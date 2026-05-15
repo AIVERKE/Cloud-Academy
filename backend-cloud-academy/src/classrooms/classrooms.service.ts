@@ -18,6 +18,10 @@ export class ClassroomsService {
   async create(createClassroomDto: CreateClassroomDto, docenteId: string): Promise<Aula> {
     const { nombre, codigo_acceso, descripcion } = createClassroomDto;
 
+    if (codigo_acceso.length < 4 || codigo_acceso.length > 10) {
+      throw new ConflictException('El código de acceso debe tener entre 4 y 10 caracteres.');
+    }
+
     // Verificar si ya existe un aula con ese código
     const existingAula = await this.aulaRepository.findOne({ where: { codigo_acceso } });
     if (existingAula) {
@@ -103,7 +107,7 @@ export class ClassroomsService {
     return allAulas.filter(aula => !aula.estudiantes.some(e => e.id === userId));
   }
 
-  private generateAccessCode(): string {
+  private generateCodigoAcceso(): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 6; i++) {

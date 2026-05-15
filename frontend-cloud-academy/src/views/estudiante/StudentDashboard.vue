@@ -12,17 +12,30 @@
         </p>
       </v-col>
       <v-col cols="12" md="4" class="text-md-right">
-        <v-btn 
-          color="primary" 
-          size="large" 
-          rounded="xl" 
-          elevation="4" 
-          prepend-icon="mdi-magnify"
-          class="px-6 font-weight-bold"
-          @click="showExplore = true"
-        >
-          Explorar Aulas
-        </v-btn>
+        <div class="d-flex flex-wrap justify-md-end gap-4">
+          <v-btn 
+            color="secondary" 
+            variant="tonal"
+            size="large" 
+            rounded="xl" 
+            prepend-icon="mdi-key"
+            class="px-6 font-weight-bold mr-2"
+            @click="showJoinDialog = true"
+          >
+            Unirse con Código
+          </v-btn>
+          <v-btn 
+            color="primary" 
+            size="large" 
+            rounded="xl" 
+            elevation="4" 
+            prepend-icon="mdi-magnify"
+            class="px-6 font-weight-bold"
+            @click="showExplore = true"
+          >
+            Explorar Aulas
+          </v-btn>
+        </div>
       </v-col>
     </v-row>
 
@@ -196,6 +209,57 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+<v-dialog v-model="showJoinDialog" max-width="450">
+      <v-card rounded="xl" class="pa-4">
+        <v-card-title class="d-flex align-center pa-4">
+          <v-avatar color="secondary" class="mr-4" size="40">
+            <v-icon icon="mdi-key" color="white"></v-icon>
+          </v-avatar>
+          <span class="text-h5 font-weight-black">Unirse a un Aula</span>
+          <v-spacer></v-spacer>
+          <v-btn icon="mdi-close" variant="text" @click="showJoinDialog = false"></v-btn>
+        </v-card-title>
+        
+        <v-card-text class="pa-4">
+          <p class="text-body-2 text-slate-500 mb-6">
+            Ingresá el código de acceso proporcionado por tu docente para inscribirte instantáneamente.
+          </p>
+          <v-form ref="joinForm" v-model="joinValid" @submit.prevent="handleJoinByCode">
+            <v-text-field
+              v-model="manualCode"
+              label="Código de Acceso"
+              placeholder="Ej: ABC123"
+              variant="outlined"
+              rounded="lg"
+              class="mb-2"
+              prepend-inner-icon="mdi-identifier"
+              :rules="[
+                v => !!v || 'El código es requerido',
+                v => (v && v.length >= 4 && v.length <= 10) || 'El código debe tener entre 4 y 10 caracteres'
+              ]"
+              required
+              @keyup.enter="handleJoinByCode"
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions class="pa-4 pt-0">
+          <v-btn 
+            block 
+            color="primary" 
+            variant="flat" 
+            size="large"
+            rounded="lg" 
+            class="font-weight-bold text-none"
+            :loading="joining" 
+            :disabled="!joinValid"
+            @click="handleJoinByCode"
+          >
+            Unirse al Aula
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Notifications -->
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" rounded="pill" elevation="12">
@@ -221,8 +285,13 @@ const loading = ref(true);
 const loadingExplore = ref(false);
 const loadingAssignments = ref(false);
 const showExplore = ref(false);
+const showJoinDialog = ref(false);
 const activeTab = ref('mis-aulas');
 const enrollingId = ref<string | null>(null);
+const joining = ref(false);
+const manualCode = ref('');
+const joinValid = ref(false);
+const joinForm = ref<any>(null);
 
 const snackbar = ref({ show: false, text: '', color: 'success' });
 
@@ -292,10 +361,28 @@ const enroll = async (aula: Classroom) => {
     showSnackbar(`¡Te inscribiste con éxito en ${aula.name}!`, 'success');
     await loadClassrooms();
     await loadAvailableClassrooms();
+    showExplore.value = false;
   } catch (error: any) {
     showSnackbar(error.message || 'Error al inscribirse', 'error');
   } finally {
     enrollingId.value = null;
+  }
+};
+
+const handleJoinByCode = async () => {
+  if (!authStore.user || !joinValid.value) return;
+  
+  joining.value = true;
+  try {
+    await dataStore.enrollInClassroom(manualCode.value, authStore.user.id);
+    showSnackbar('¡Te has unido al aula exitosamente! 🎉', 'success');
+    showJoinDialog.value = false;
+    manualCode.value = '';
+    await loadClassrooms();
+  } catch (error: any) {
+    showSnackbar(error.message || 'Error al unirse con el código', 'error');
+  } finally {
+    joining.value = false;
   }
 };
 
