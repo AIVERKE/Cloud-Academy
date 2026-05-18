@@ -44,8 +44,50 @@
         <SystemActivityList title="Actividad del Sistema" :activities="activities" />
       </v-col>
 
+      <!-- Student Upcoming Assignments -->
+      <v-col v-if="authStore.user?.role !== 'Root' && authStore.user?.role !== 'Docente'" cols="12" md="8">
+        <v-card flat class="bg-transparent border-0">
+          <v-card-title class="px-0 pb-4 text-h6 font-weight-black text-slate-900 d-flex align-center">
+            <v-icon icon="mdi-calendar-clock" color="primary" class="mr-2"></v-icon>
+            Próximas Tareas
+          </v-card-title>
+          
+          <v-row v-if="upcomingStudentAssignments.length > 0">
+            <v-col v-for="assignment in upcomingStudentAssignments" :key="assignment.id" cols="12">
+              <v-card border flat rounded="xl" class="pa-4 bg-white d-flex align-center stat-card">
+                <v-avatar color="primary-lighten-5" class="mr-4">
+                  <v-icon icon="mdi-clock-outline" color="primary"></v-icon>
+                </v-avatar>
+                <div class="flex-grow-1">
+                  <div class="text-subtitle-1 font-weight-black text-slate-900">{{ assignment.titulo }}</div>
+                  <div class="text-caption text-slate-400 mt-1 d-flex align-center">
+                    {{ getClassroomName(assignment.aulaId) }} • Vence: {{ new Date(assignment.fecha_limite).toLocaleDateString() }}
+                    <v-chip size="x-small" class="ml-2 font-weight-bold" :color="getDaysColor(assignment.fecha_limite)" variant="flat">
+                      {{ getDaysRemaining(assignment.fecha_limite) }}
+                    </v-chip>
+                  </div>
+                </div>
+                <v-btn 
+                  color="primary" 
+                  variant="tonal" 
+                  rounded="pill"
+                  class="text-none font-weight-bold"
+                  :to="`/dashboard/estudiante/aulas/${assignment.aulaId}/tareas/${assignment.id}/entregar`"
+                >
+                  Entregar
+                </v-btn>
+              </v-card>
+            </v-col>
+          </v-row>
+          <v-card v-else border flat rounded="xl" class="pa-8 text-center bg-white mt-2">
+            <v-icon icon="mdi-calendar-check" size="48" color="success" class="mb-4" opacity="0.5"></v-icon>
+            <div class="text-subtitle-1 font-weight-bold text-slate-400">¡Todo listo! No tenés tareas pendientes.</div>
+          </v-card>
+        </v-card>
+      </v-col>
+
       <!-- Quick Actions / Context Menu -->
-      <v-col cols="12" :md="authStore.user?.role === 'Root' ? 4 : 12">
+      <v-col cols="12" :md="authStore.user?.role === 'Docente' ? 12 : 4">
         <QuickActionsMenu 
           title="Acciones Rápidas" 
           :actions="quickActions" 
@@ -140,6 +182,9 @@ const teacherStats = ref({
   averageGrade: '...'
 });
 
+const studentAssignments = ref<any[]>([]);
+const studentClassrooms = ref<any[]>([]);
+
 const activities = ref<any[]>([]);
 
 onMounted(async () => {
@@ -160,6 +205,16 @@ onMounted(async () => {
       totalResources: stats.totalResources,
       averageGrade: stats.averageGrade
     };
+  } else {
+    // Estudiante
+    if (authStore.user) {
+      const [fetchedClassrooms, fetchedAssignments] = await Promise.all([
+        dataStore.fetchClassrooms(authStore.user.id),
+        dataStore.fetchAssignments()
+      ]);
+      studentClassrooms.value = fetchedClassrooms;
+      studentAssignments.value = fetchedAssignments;
+    }
   }
 });
 
@@ -215,8 +270,47 @@ const currentStats = computed(() => {
       { label: 'Promedio', value: teacherStats.value.averageGrade, icon: 'mdi-trending-up', color: 'success' },
     ];
   }
+  if (authStore.user?.role === 'Estudiante' || !['Root', 'Docente'].includes(authStore.user?.role || '')) {
+    return [
+      { label: 'Mis Aulas', value: studentClassrooms.value.length.toString(), icon: 'mdi-school', color: 'primary' },
+      { label: 'Tareas Pendientes', value: upcomingStudentAssignments.value.length.toString(), icon: 'mdi-clipboard-text-clock-outline', color: 'error' },
+    ];
+  }
   return [];
 });
+
+const upcomingStudentAssignments = computed(() => {
+  const sorted = [...studentAssignments.value].sort((a, b) => {
+    return new Date(a.fecha_limite).getTime() - new Date(b.fecha_limite).getTime();
+  });
+  const pending = sorted.filter(a => {
+    const estado = a.estado?.toString().toLowerCase();
+    return estado !== 'entregado' && estado !== 'entregada' && estado !== 'calificado' && estado !== 'calificada';
+  });
+  return pending.slice(0, 5); // Show top 5 on dashboard home
+});
+
+const getDaysRemaining = (fecha: string) => {
+  const diff = new Date(fecha).getTime() - new Date().getTime();
+  const days = Math.ceil(diff / (1000 * 3600 * 24));
+  if (days < 0) return 'Vencida';
+  if (days === 0) return 'Vence hoy';
+  if (days === 1) return 'Vence mañana';
+  return `Faltan ${days} días`;
+};
+
+const getDaysColor = (fecha: string) => {
+  const diff = new Date(fecha).getTime() - new Date().getTime();
+  const days = Math.ceil(diff / (1000 * 3600 * 24));
+  if (days < 0) return 'error';
+  if (days <= 2) return 'warning';
+  return 'info';
+};
+
+const getClassroomName = (aulaId: string) => {
+  const cls = studentClassrooms.value.find(c => c.id === aulaId);
+  return cls ? cls.name : 'Aula Desconocida';
+};
 
 const quickActions = computed(() => {
   if (authStore.user?.role === 'Root') {
@@ -226,9 +320,13 @@ const quickActions = computed(() => {
       { title: 'Gestionar Usuarios', desc: 'Roles y permisos', icon: 'mdi-account-cog', color: 'info', to: '/dashboard/admin/usuarios' },
     ];
   }
+  if (authStore.user?.role === 'Docente') {
+    return [
+      { title: 'Ver mis Aulas', desc: 'Gestionar aulas virtuales', icon: 'mdi-google-classroom', color: 'primary', to: '/dashboard/docente/aulas' },
+    ];
+  }
   return [
-    { title: 'Ver mis Cursos', desc: 'Acceder a las aulas virtuales', icon: 'mdi-school', color: 'primary', to: '/dashboard/docente/aulas' },
-    { title: 'Mi Perfil', desc: 'Ajustes de cuenta', icon: 'mdi-account-circle', color: 'secondary', to: '#' },
+    { title: 'Ver mis Cursos', desc: 'Acceder a las aulas virtuales', icon: 'mdi-school', color: 'primary', to: '/dashboard/estudiante/aulas' },
   ];
 });
 </script>

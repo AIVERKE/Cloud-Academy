@@ -130,8 +130,11 @@
               </v-avatar>
               <div class="flex-grow-1">
                 <div class="text-subtitle-1 font-weight-black text-slate-900">{{ assignment.titulo }}</div>
-                <div class="text-caption text-slate-400">
+                <div class="text-caption text-slate-400 mt-1 d-flex align-center">
                   {{ getClassroomName(assignment.aulaId) }} • Vence: {{ new Date(assignment.fecha_limite).toLocaleDateString() }}
+                  <v-chip size="x-small" class="ml-2 font-weight-bold" :color="getDaysColor(assignment.fecha_limite)" variant="flat">
+                    {{ getDaysRemaining(assignment.fecha_limite) }}
+                  </v-chip>
                 </div>
               </div>
               <v-btn 
@@ -303,8 +306,33 @@ onMounted(async () => {
 });
 
 const upcomingAssignments = computed(() => {
-  return assignments.value.slice(0, 5); // Show top 5 soonest
+  const sorted = [...assignments.value].sort((a, b) => {
+    return new Date(a.fecha_limite).getTime() - new Date(b.fecha_limite).getTime();
+  });
+  // Filter out delivered assignments based on estado if present
+  const pending = sorted.filter(a => {
+    const estado = a.estado?.toString().toLowerCase();
+    return estado !== 'entregado' && estado !== 'entregada' && estado !== 'calificado' && estado !== 'calificada';
+  });
+  return pending;
 });
+
+const getDaysRemaining = (fecha: string) => {
+  const diff = new Date(fecha).getTime() - new Date().getTime();
+  const days = Math.ceil(diff / (1000 * 3600 * 24));
+  if (days < 0) return 'Vencida';
+  if (days === 0) return 'Vence hoy';
+  if (days === 1) return 'Vence mañana';
+  return `Faltan ${days} días`;
+};
+
+const getDaysColor = (fecha: string) => {
+  const diff = new Date(fecha).getTime() - new Date().getTime();
+  const days = Math.ceil(diff / (1000 * 3600 * 24));
+  if (days < 0) return 'error';
+  if (days <= 2) return 'warning';
+  return 'info';
+};
 
 const loadAssignments = async () => {
   if (!authStore.user) return;
