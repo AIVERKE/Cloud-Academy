@@ -5,6 +5,7 @@ import { Aula } from './entities/aula.entity';
 import { User } from '../auth/entities/user.entity';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { JoinClassroomDto } from './dto/join-classroom.dto';
+import { UpdateClassroomDto } from './dto/update-classroom.dto';
 
 @Injectable()
 export class ClassroomsService {
@@ -43,6 +44,17 @@ export class ClassroomsService {
       }
       throw error;
     }
+  }
+
+  async update(id: string, updateClassroomDto: UpdateClassroomDto, docenteId: string): Promise<Aula> {
+    const aula = await this.aulaRepository.findOne({ where: { id, docente_id: docenteId } });
+    
+    if (!aula) {
+      throw new NotFoundException(`Aula con ID ${id} no encontrada o no tienes permisos para editarla`);
+    }
+
+    Object.assign(aula, updateClassroomDto);
+    return await this.aulaRepository.save(aula);
   }
 
   async findAll(userId: string): Promise<Aula[]> {

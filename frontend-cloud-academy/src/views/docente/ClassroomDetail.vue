@@ -217,7 +217,7 @@
                  <v-card-title class="px-0">Ajustes Generales</v-card-title>
                  <v-text-field label="Nombre del Aula" v-model="classroom!.name" variant="outlined" rounded="lg" class="mt-4"></v-text-field>
                  <v-textarea label="Descripción" v-model="classroom!.description" variant="outlined" rounded="lg"></v-textarea>
-                 <v-btn color="primary" rounded="lg">Guardar Cambios</v-btn>
+                 <v-btn color="primary" rounded="lg" :loading="savingClassroom" @click="handleSaveClassroomClick">Guardar Cambios</v-btn>
                </v-card>
              </v-col>
              <v-col cols="12" md="6">
@@ -231,6 +231,40 @@
         </v-window-item>
       </v-window>
     </v-card>
+
+    <!-- Dialogo Confirmación Guardar Aula -->
+    <v-dialog v-model="confirmDialog" max-width="400">
+      <v-card class="rounded-xl pa-2">
+        <v-card-title class="d-flex justify-space-between align-center px-4 pt-4 pb-0">
+          <span class="text-h6 font-weight-bold">¿Guardar cambios del aula?</span>
+          <v-btn icon="mdi-close" variant="text" @click="confirmDialog = false"></v-btn>
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <p class="text-body-1 mb-2">Estás a punto de modificar la información de esta aula.</p>
+          <div v-if="originalClassroom && classroom" class="bg-slate-50 pa-3 rounded-lg border-light">
+            <div v-if="originalClassroom.name.trim() !== classroom.name.trim()" class="mb-2">
+              <span class="text-caption text-medium-emphasis">Nombre:</span>
+              <div class="text-body-2 text-decoration-line-through text-error">{{ originalClassroom.name }}</div>
+              <div class="text-body-2 text-success">{{ classroom.name }}</div>
+            </div>
+            <div v-if="(originalClassroom.description || '').trim() !== (classroom.description || '').trim()">
+              <span class="text-caption text-medium-emphasis">Descripción:</span>
+              <div class="text-body-2 text-decoration-line-through text-error">{{ originalClassroom.description || 'Sin descripción' }}</div>
+              <div class="text-body-2 text-success">{{ classroom.description || 'Sin descripción' }}</div>
+            </div>
+          </div>
+        </v-card-text>
+        <v-card-actions class="pa-4 pt-0">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" color="slate-500" rounded="lg" class="px-6" @click="confirmDialog = false">
+            Cancelar
+          </v-btn>
+          <v-btn color="primary" variant="elevated" rounded="lg" class="px-8" :loading="savingClassroom" @click="confirmSaveClassroom">
+            Confirmar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Dialogo Tarea Premium -->
     <v-dialog v-model="dialog" max-width="600" persistent>
@@ -337,6 +371,9 @@ const authStore = useAuthStore();
 
 const classroomId = route.params.id as string;
 const classroom = ref<any>(null);
+const originalClassroom = ref<any>(null);
+const confirmDialog = ref(false);
+const savingClassroom = ref(false);
 const assignments = ref<any[]>([]);
 const students = ref<any[]>([]);
 const tab = ref('tareas');
@@ -381,7 +418,9 @@ onMounted(async () => {
 const loadClassroomDetails = async () => {
   if (!authStore.user?.id) return;
   const classes = await dataStore.fetchClassrooms(authStore.user.id);
-  classroom.value = classes.find((c: any) => c.id === classroomId) || null;
+  const found = classes.find((c: any) => c.id === classroomId) || null;
+  classroom.value = found ? { ...found } : null;
+  originalClassroom.value = found ? { ...found } : null;
 };
 
 const loadAssignments = async () => {
@@ -472,6 +511,52 @@ const goToSubmissions = (tareaId: string) => {
     name: 'SubmissionsTable',
     params: { aulaId: classroomId, tareaId }
   });
+};
+
+const handleSaveClassroomClick = () => {
+  if (!classroom.value || !originalClassroom.value) return;
+  
+  const currentName = (classroom.value.name || '').trim();
+  const currentDesc = (classroom.value.description || '').trim();
+  const oldName = (originalClassroom.value.name || '').trim();
+  const oldDesc = (originalClassroom.value.description || '').trim();
+
+  if (currentName === oldName && currentDesc === oldDesc) {
+    showSnackbar('No hay cambios', 'info');
+    return;
+  }
+  confirmDialog.value = true;
+};
+
+const confirmSaveClassroom = async () => {
+  if (!authStore.user?.id) return;
+  savingClassroom.value = true;
+  try {
+    const trimmedName = classroom.value.name.trim();
+    const trimmedDesc = (classroom.value.description || '').trim();
+
+    const result = await dataStore.updateClassroom(
+      classroomId, 
+      { name: trimmedName, description: trimmedDesc }, 
+      authStore.user.id
+    );
+    
+    // Update local values with trimmed ones
+    classroom.value.name = trimmedName;
+    classroom.value.description = trimmedDesc;
+    originalClassroom.value = { ...classroom.value };
+    confirmDialog.value = false;
+
+    if (result && result._auditSyncError) {
+      showSnackbar('¡Aula actualizada, pero falló la sincronización con Google Sheets!', 'error');
+    } else {
+      showSnackbar('¡Aula actualizada correctamente!', 'success');
+    }
+  } catch (error) {
+    showSnackbar('Error al actualizar el aula', 'error');
+  } finally {
+    savingClassroom.value = false;
+  }
 };
 
 const copyCode = (code: string) => {

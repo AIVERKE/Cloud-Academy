@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Body, Param, Headers, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Headers, UnauthorizedException } from '@nestjs/common';
 import { ClassroomsService } from './classrooms.service';
 import { CreateClassroomDto } from './dto/create-classroom.dto';
 import { JoinClassroomDto } from './dto/join-classroom.dto';
+import { UpdateClassroomDto } from './dto/update-classroom.dto';
 import { SubmissionsService } from '../submissions/submissions.service';
 import { AuditLog } from '../audit/decorators/audit-log.decorator';
 
@@ -22,6 +23,19 @@ export class ClassroomsController {
       throw new UnauthorizedException('User ID is required and must be valid');
     }
     return await this.classroomsService.create(createClassroomDto, userId);
+  }
+
+  @AuditLog('UPDATE_AULA')
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateClassroomDto: UpdateClassroomDto,
+    @Headers('user-id') userId: string,
+  ) {
+    if (!userId || userId === 'undefined') {
+      throw new UnauthorizedException('User ID is required and must be valid');
+    }
+    return await this.classroomsService.update(id, updateClassroomDto, userId);
   }
 
   @Get()
