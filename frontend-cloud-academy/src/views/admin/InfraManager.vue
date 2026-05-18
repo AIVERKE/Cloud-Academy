@@ -59,20 +59,7 @@
             Google Sheets Bridge
           </v-card-title>
           <v-card-text class="px-6 pb-6">
-            <v-text-field
-              v-model="sheetId"
-              label="Spreadsheet ID"
-              variant="outlined"
-              hint="ID de la hoja donde se registran los eventos del sistema"
-              persistent-hint
-              class="mb-6"
-            >
-              <template v-slot:append-inner>
-                <v-btn icon="mdi-link-variant" variant="text" size="small" @click="openSheet"></v-btn>
-              </template>
-            </v-text-field>
-
-            <div class="d-flex flex-column gap-2">
+            <div class="d-flex flex-column gap-4">
               <div class="d-flex gap-4">
                 <v-btn
                   variant="tonal"
@@ -85,11 +72,11 @@
                 </v-btn>
                 <v-btn
                   variant="flat"
-                  color="success"
-                  prepend-icon="mdi-check-circle"
-                  @click="saveConfig"
+                  color="info"
+                  prepend-icon="mdi-link-variant"
+                  @click="openSheet"
                 >
-                  Guardar
+                  Abrir Drive
                 </v-btn>
               </div>
               <v-btn
@@ -145,12 +132,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useDataStore } from '../../store/data';
+import * as xlsx from 'xlsx';
 
 const dataStore = useDataStore();
 const syncing = ref(false);
 const syncStatus = ref<{ type: 'success' | 'error', message: string } | null>(null);
 const lastSync = ref('');
-const sheetId = ref('1A2B3C4D5E6F7G8H9I0J_K_L_M_N_O_P');
+const sheetId = import.meta.env.VITE_GOOGLE_SHEETS_ID || '';
 const showEditor = ref(false);
 const loadingSheet = ref(false);
 const exporting = ref(false);
@@ -197,7 +185,7 @@ const handleFetchSheet = async () => {
   loadingSheet.value = true;
   showEditor.value = true;
   try {
-    const data = await dataStore.fetchSheetData(sheetId.value);
+    const data = await dataStore.fetchSheetData(sheetId);
     // data es string[][], lo convertimos a objetos para el data-table
     sheetRows.value = data.map((row: any) => {
       const obj: any = {};
@@ -216,21 +204,32 @@ const handleFetchSheet = async () => {
 const handleExportLogs = async () => {
   exporting.value = true;
   try {
-    await dataStore.exportLogsToSheet(sheetId.value);
-    alert('Logs exportados exitosamente a Google Sheets.');
+    const data = await dataStore.fetchSheetData(sheetId);
+    if (!data || data.length === 0) {
+      alert('No hay datos para exportar.');
+      return;
+    }
+    const worksheet = xlsx.utils.aoa_to_sheet(data);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, "Auditoria");
+    
+    const fecha = new Date().toISOString().split('T')[0];
+    const fileName = `registros-auditoria-${fecha}.xlsx`;
+    
+    xlsx.writeFile(workbook, fileName);
   } catch (error) {
-    alert('Error al exportar logs. Verifica el Spreadsheet ID.');
+    alert('Error al exportar logs. Verifica la configuración.');
   } finally {
     exporting.value = false;
   }
 };
 
-const saveConfig = () => {
-  alert('Configuración guardada correctamente.');
-};
-
 const openSheet = () => {
-  window.open(`https://docs.google.com/spreadsheets/d/${sheetId.value}`, '_blank');
+  if (sheetId) {
+    window.open(`https://docs.google.com/spreadsheets/d/${sheetId}`, '_blank');
+  } else {
+    alert('No hay Spreadsheet ID configurado.');
+  }
 };
 </script>
 
