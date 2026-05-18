@@ -223,8 +223,12 @@ const copyCode = (code: string) => {
 };
 
 const generateCode = () => {
-  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-  newClassroom.value.codigo_acceso = random;
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  newClassroom.value.codigo_acceso = result;
 };
 
 const handleCreateClassroom = async () => {
